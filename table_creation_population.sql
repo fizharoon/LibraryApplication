@@ -62,22 +62,25 @@ CREATE TABLE librarian(
 );
 
 CREATE TABLE holds(
-    h_bookkey       INTEGER(270) UNIQUE,
-    h_userkey       INTEGER(200) UNIQUE,
-    h_holdplaced    DATETIME
+    h_bookkey       INTEGER(270),
+    h_userkey       INTEGER(200),
+    h_holdplaced    DATETIME,
+    UNIQUE(h_bookkey, h_userkey)
 );
 
 CREATE TABLE ebook_checkout(
-    ec_bookkey      INTEGER(270) UNIQUE,
-    ec_userkey      INTEGER(270) UNIQUE,
-    ec_codate       DATETIME
+    ec_bookkey      INTEGER(270),
+    ec_userkey      INTEGER(270),
+    ec_codate       DATETIME,
+    UNIQUE(ec_bookkey, ec_userkey)
 );
 
 CREATE TABLE checkout_history(
-    ch_bookkey      INTEGER(270) UNIQUE,
-    ch_userkey      INTEGER(200) UNIQUE,
-    ch_codate       DATETIME UNIQUE,
-    ch_cidate       DATETIME UNIQUE
+    ch_bookkey      INTEGER(270),
+    ch_userkey      INTEGER(200),
+    ch_codate       DATETIME,
+    ch_cidate       DATETIME,
+    UNIQUE(ch_bookkey, ch_userkey, ch_codate, ch_cidate)
 );
 
 INSERT INTO books (b_pages, b_title)
@@ -102,3 +105,40 @@ INSERT INTO book_stats (bs_bookkey, bs_rating, bs_reviews, bs_price)
 SELECT b_bookkey, rating, reviews, price
 FROM books, import
 WHERE b_title = book_title;
+
+CREATE TABLE hb_import (
+    bookkey  INTEGER(270) PRIMARY KEY,
+    userkey  INTEGER(200),
+    codate   DATETIME
+);
+
+-- .import --skip 1 hardcopy_books.csv hb_import
+
+UPDATE hardcopy_books
+SET
+    hb_userkey =
+        (SELECT userkey FROM hb_import
+        WHERE hb_bookkey = bookkey),
+    hb_codate = 
+        (SELECT codate FROM hb_import
+        WHERE hb_bookkey = bookkey);
+
+SELECT *
+FROM ebook_checkout
+ORDER BY ec_userkey;
+
+DELETE FROM holds
+WHERE h_bookkey IN
+    (SELECT e_bookkey FROM ebooks);
+
+DELETE FROM ebook_checkout
+WHERE ec_bookkey IN
+    (SELECT hb_bookkey FROM hardcopy_books);
+
+DELETE FROM checkout_history
+WHERE ch_bookkey IN
+    (SELECT e_bookkey FROM ebooks);
+
+SELECT *
+FROM holds
+ORDER BY h_bookkey;
