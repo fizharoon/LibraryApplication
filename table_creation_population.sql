@@ -1,4 +1,5 @@
 DROP TABLE import;
+DROP TABLE hb_import;
 DROP TABLE books;
 DROP TABLE book_stats;
 DROP TABLE hardcopy_books;
@@ -9,6 +10,7 @@ DROP TABLE holds;
 DROP TABLE ebook_checkout;
 DROP TABLE checkout_history;
 
+-- Define schema for tables
 CREATE TABLE import(
     rating          DECIMAL(3,2) not null,
     reviews         DECIMAL(4,0) not null,
@@ -83,29 +85,37 @@ CREATE TABLE checkout_history(
     UNIQUE(ch_bookkey, ch_userkey, ch_codate, ch_cidate)
 );
 
+-- .import --skip 1 prog_books.csv import
+
+-- Run this after importing full book dataset into import table
 INSERT INTO books (b_pages, b_title)
 SELECT number_of_pages, book_title FROM import WHERE 1;
 
+-- Define book keys by row id (arbitrary but will be kept consistent)
 UPDATE books
 SET b_bookkey = ROWID;
 
+-- Put all hard copy books into a table
 INSERT INTO hardcopy_books (hb_bookkey, hb_type)
 SELECT b_bookkey, type
 FROM books, import
 WHERE b_title = book_title AND
     type IN ('Hardcover', 'Paperback', 'Unknown Binding');
 
+-- Put all ebooks into a table
 INSERT INTO ebooks (e_bookkey, e_format)
 SELECT b_bookkey, type
 FROM books, import
 WHERE b_title = book_title AND
     type IN ('ebook', 'Kindle Edition');
 
+-- Populate book stats from import table
 INSERT INTO book_stats (bs_bookkey, bs_rating, bs_reviews, bs_price)
 SELECT b_bookkey, rating, reviews, price
 FROM books, import
 WHERE b_title = book_title;
 
+-- Schema for importing mock hard copy checkout data
 CREATE TABLE hb_import (
     bookkey  INTEGER(270) PRIMARY KEY,
     userkey  INTEGER(200),
@@ -116,6 +126,7 @@ CREATE TABLE hb_import (
 
 -- ch_codate + days(random(0, date_diff('days', ch_codate, date('2022-06-30'))))
 
+-- Set hard copy books as being checked out based on mock data
 UPDATE hardcopy_books
 SET
     hb_userkey =
@@ -125,24 +136,31 @@ SET
         (SELECT codate FROM hb_import
         WHERE hb_bookkey = bookkey);
 
-SELECT *
-FROM ebook_checkout
-ORDER BY ec_userkey;
+-- .import --skip 1 holds.csv holds
 
+-- Remove ebooks from holds table (ebooks can't be held)
 DELETE FROM holds
 WHERE h_bookkey IN
     (SELECT e_bookkey FROM ebooks);
 
+-- .import --skip 1 ebook_checkout.csv ebook_checkout
+
+-- Remove hard copy books from ebook checkout table
 DELETE FROM ebook_checkout
 WHERE ec_bookkey IN
     (SELECT hb_bookkey FROM hardcopy_books);
 
+-- .import --skip 1 checkout_history.csv checkout_history
+
+-- Remove ebooks from hard copy checkout table
 DELETE FROM checkout_history
 WHERE ch_bookkey IN
     (SELECT e_bookkey FROM ebooks);
 
-DELETE FROM hb_import
+-- .import --skip 1 Librarian.csv librarian
+-- .import --skip 1 user.csv user
 
-SELECT count()
-FROM hardcopy_books
-WHERE hb_codate NOT NULL
+-- :::NOTE:::
+-- Imports don't seem to work unless sqlite engine is launched from same directory as csv files
+-- cd data\ files
+-- sqlite3 ../progbooks.db
