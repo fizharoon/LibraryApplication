@@ -140,3 +140,52 @@ WHERE
     ec_bookkey = e_bookkey AND
     ec_userkey = 69 AND
     DATE(ec_codate, e_loanperiod) > DATE();
+
+
+
+
+-- USER
+-- find a kindle edition book
+select b_title from books, ebooks 
+where b_bookkey = e_bookkey
+    and e_format = 'Kindle Edition'
+-- find paperback books
+select b_title from books, hardcopy_books
+where b_bookkey = hb_bookkey
+    and hb_type = 'Paperback'
+
+-- LIBRARIAN
+
+-- librarian inserts user into user table
+INSERT INTO user VALUES (201, "Stella Chang", "schang99", "sdfeIdf", 9)
+
+-- librarian removes user
+DELETE FROM user
+WHERE u_userkey = 201
+
+
+-- what books each user checked out 
+select u_name, hb_bookkey from user , hardcopy_books
+where u_userkey = 71
+    and u_userkey = hb_userkey
+
+select u_name, ec_bookkey from user, ebook_checkout
+where u_userkey = 120
+    and ec_userkey = u_userkey
+
+-- how many books each user has checked out
+select u_userkey, u_name, count(hb_bookkey) 
+from user , hardcopy_books
+where u_userkey = hb_userkey
+group by u_userkey
+
+-- find specific user 
+select * from user 
+where u_name = 'Camala Wedgbrow'
+
+-- update user's information
+update user 
+set u_address = '42958 Katie Drive'
+where u_userkey = 1
+
+
