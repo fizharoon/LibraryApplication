@@ -53,7 +53,9 @@ CREATE TABLE user(
     u_name          VARCHAR(1000),
     u_username      VARCHAR(20),
     u_password      VARCHAR(20),
-    u_librariankey  INTEGER(10)
+    u_librariankey  INTEGER(10),
+    u_address       VARCHAR(1000),
+    u_phone         VARCHAR(500)
 );
 
 CREATE TABLE librarian(
@@ -120,6 +122,12 @@ CREATE TABLE hb_import (
     bookkey  INTEGER(270) PRIMARY KEY,
     userkey  INTEGER(200),
     codate   DATETIME
+);
+DROP TABLE user_info;
+CREATE TABLE user_info (
+    id INTEGER(270) PRIMARY KEY,
+    u_address VARCHAR(500),
+    u_phone VARCHAR(500)
 );
 
 -- .import --skip 1 hardcopy_books.csv hb_import
