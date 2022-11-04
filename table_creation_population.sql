@@ -51,7 +51,9 @@ CREATE TABLE user(
     u_name          VARCHAR(1000),
     u_username      VARCHAR(20),
     u_password      VARCHAR(20),
-    u_librariankey  INTEGER(10)
+    u_librariankey  INTEGER(10),
+    u_address       VARCHAR(1000),
+    u_phone         VARCHAR(500)
 );
 
 CREATE TABLE librarian(
@@ -111,9 +113,15 @@ CREATE TABLE hb_import (
     userkey  INTEGER(200),
     codate   DATETIME
 );
+DROP TABLE user_info;
+CREATE TABLE user_info (
+    id INTEGER(270) PRIMARY KEY,
+    u_address VARCHAR(500),
+    u_phone VARCHAR(500)
+);
 
 -- .import --skip 1 hardcopy_books.csv hb_import
-
+.import --skip 1 user.csv user
 UPDATE hardcopy_books
 SET
     hb_userkey =
@@ -122,6 +130,14 @@ SET
     hb_codate = 
         (SELECT codate FROM hb_import
         WHERE hb_bookkey = bookkey);
+
+UPDATE user
+SET 
+    u_address = (select u_address from user_info
+                where u_userkey = id),
+    u_phone = (select u_phone from user_info
+                where u_userkey = id)
+
 
 SELECT *
 FROM ebook_checkout
@@ -142,3 +158,4 @@ WHERE ch_bookkey IN
 SELECT *
 FROM holds
 ORDER BY h_bookkey;
+
