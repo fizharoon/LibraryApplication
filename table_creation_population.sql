@@ -123,12 +123,19 @@ CREATE TABLE hb_import (
     userkey  INTEGER(200),
     codate   DATETIME
 );
-DROP TABLE user_info;
+
 CREATE TABLE user_info (
     id INTEGER(270) PRIMARY KEY,
     u_address VARCHAR(500),
     u_phone VARCHAR(500)
 );
+
+UPDATE user
+SET 
+    u_address = (select u_address from user_info
+                where u_userkey = id),
+    u_phone = (select u_phone from user_info
+                where u_userkey = id);
 
 -- .import --skip 1 hardcopy_books.csv hb_import
 
@@ -167,6 +174,10 @@ WHERE ch_bookkey IN
 
 -- .import --skip 1 Librarian.csv librarian
 -- .import --skip 1 user.csv user
+
+DROP TABLE user_info;
+DROP TABLE import;
+DROP TABLE hb_import;
 
 -- :::NOTE:::
 -- Imports don't seem to work unless sqlite engine is launched from same directory as csv files

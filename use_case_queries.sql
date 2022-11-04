@@ -1,6 +1,6 @@
 -- Search for book by title
 -- args: search keyword
-SELECT books.*, book_stats.*, hb_type,
+SELECT b_title, b_pages, bs_rating, hb_type,
     CASE
     WHEN hb_userkey IS NULL
         THEN 'Available'
@@ -10,14 +10,77 @@ FROM books, book_stats, hardcopy_books
 WHERE
     bs_bookkey = b_bookkey AND
     hb_bookkey = b_bookkey AND
-    b_title LIKE '%game%'
+    b_title LIKE '%computer%'
 UNION
-SELECT books.*, book_stats.*, e_format, 'Available'
+SELECT b_title, b_pages, bs_rating, e_format, 'Available'
 FROM books, book_stats, ebooks
 WHERE
     bs_bookkey = b_bookkey AND
     e_bookkey = b_bookkey AND
-    b_title LIKE '%game%';
+    b_title LIKE '%computer%';
+
+----------------------------------------------------
+
+-- Show all books in alphabetical order by title
+SELECT b_title, b_pages, bs_rating, hb_type,
+    CASE
+    WHEN hb_userkey IS NULL
+        THEN 'Available'
+    ELSE 'Unavailable'
+    END availability
+FROM books, book_stats, hardcopy_books
+WHERE
+    bs_bookkey = b_bookkey AND
+    hb_bookkey = b_bookkey
+UNION
+SELECT b_title, b_pages, bs_rating, e_format, 'Available'
+FROM books, book_stats, ebooks
+WHERE
+    bs_bookkey = b_bookkey AND
+    e_bookkey = b_bookkey
+ORDER BY b_title;
+
+----------------------------------------------------
+
+-- Show all books in increasing order of page count
+SELECT b_title, b_pages, bs_rating, hb_type,
+    CASE
+    WHEN hb_userkey IS NULL
+        THEN 'Available'
+    ELSE 'Unavailable'
+    END availability
+FROM books, book_stats, hardcopy_books
+WHERE
+    bs_bookkey = b_bookkey AND
+    hb_bookkey = b_bookkey
+UNION
+SELECT b_title, b_pages, bs_rating, e_format, 'Available'
+FROM books, book_stats, ebooks
+WHERE
+    bs_bookkey = b_bookkey AND
+    e_bookkey = b_bookkey
+ORDER BY b_pages;
+
+----------------------------------------------------
+
+-- Show all books in decreasing order of rating
+SELECT b_title, b_pages, bs_rating, hb_type,
+    CASE
+    WHEN hb_userkey IS NULL
+        THEN 'Available'
+    ELSE 'Unavailable'
+    END availability
+FROM books, book_stats, hardcopy_books
+WHERE
+    bs_bookkey = b_bookkey AND
+    hb_bookkey = b_bookkey
+UNION
+SELECT b_title, b_pages, bs_rating, e_format, 'Available'
+FROM books, book_stats, ebooks
+WHERE
+    bs_bookkey = b_bookkey AND
+    e_bookkey = b_bookkey
+ORDER BY bs_rating DESC;
 
 ----------------------------------------------------
 
@@ -83,23 +146,23 @@ WHERE h_bookkey = 69;
 ----------------------------------------------------
 
 -- Count how many times each book has been checked out
-SELECT past_checkouts + current_checkouts as total_checkouts, past.b_title
+SELECT past_checkouts + current_checkouts as total_checkouts, past.b_bookkey
 FROM
-    (SELECT count() as past_checkouts, b_title
+    (SELECT count() as past_checkouts, b_bookkey
     FROM books, checkout_history
     WHERE b_bookkey = ch_bookkey
     GROUP BY b_bookkey
     ) past,
-    (SELECT count() as current_checkouts, b_title
+    (SELECT count() as current_checkouts, b_bookkey
     FROM books, hardcopy_books
     WHERE
         b_bookkey = hb_bookkey AND
         hb_codate NOT NULL
     GROUP BY b_bookkey
     ) present
-GROUP BY past.b_title
+GROUP BY past.b_bookkey
 UNION
-SELECT count() as total_checkouts, b_title
+SELECT count() as total_checkouts, b_bookkey
 FROM books, ebook_checkout
 WHERE b_bookkey = ec_bookkey
 GROUP BY b_bookkey
@@ -113,10 +176,10 @@ SELECT hardcopy_checkouts + ebook_checkouts as total_checkouts
 FROM
     (SELECT count() as hardcopy_checkouts
     FROM checkout_history
-    WHERE ch_bookkey = 69),
+    WHERE ch_bookkey = 79),
     (SELECT count() as ebook_checkouts
     FROM ebook_checkout
-    WHERE ec_bookkey = 69);
+    WHERE ec_bookkey = 79);
 
 ----------------------------------------------------
 
@@ -141,37 +204,34 @@ WHERE
     ec_userkey = 69 AND
     DATE(ec_codate, e_loanperiod) > DATE();
 
+----------------------------------------------------
 
-
-
--- USER
 -- find a kindle edition book
 select b_title from books, ebooks 
 where b_bookkey = e_bookkey
     and e_format = 'Kindle Edition'
+
+----------------------------------------------------
+
 -- find paperback books
 select b_title from books, hardcopy_books
 where b_bookkey = hb_bookkey
     and hb_type = 'Paperback'
 
--- LIBRARIAN
+----------------------------------------------------
 
 -- librarian inserts user into user table
-INSERT INTO user VALUES (201, "Stella Chang", "schang99", "sdfeIdf", 9)
+-- args: librarian key
+INSERT INTO user VALUES ((SELECT max(u_userkey) FROM user)+1, "Stella Chang", "schang99", "sdfeIdf", 9, '123 Sesame St', '209-555-5555')
+
+----------------------------------------------------
 
 -- librarian removes user
+-- args: user key
 DELETE FROM user
 WHERE u_userkey = 201
 
-
--- what books each user checked out 
-select u_name, hb_bookkey from user , hardcopy_books
-where u_userkey = 71
-    and u_userkey = hb_userkey
-
-select u_name, ec_bookkey from user, ebook_checkout
-where u_userkey = 120
-    and ec_userkey = u_userkey
+----------------------------------------------------
 
 -- how many books each user has checked out
 select u_userkey, u_name, count(hb_bookkey) 
@@ -179,9 +239,13 @@ from user , hardcopy_books
 where u_userkey = hb_userkey
 group by u_userkey
 
+----------------------------------------------------
+
 -- find specific user 
 select * from user 
 where u_name = 'Camala Wedgbrow'
+
+----------------------------------------------------
 
 -- update user's information
 update user 
