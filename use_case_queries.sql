@@ -1,5 +1,5 @@
 -- Search for book by title
--- args: search keyword
+-- args: search 
 SELECT b_title, b_pages, bs_rating, hb_type,
     CASE
     WHEN hb_userkey IS NULL

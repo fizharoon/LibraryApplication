@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/page.css') }}">
+</head>
+
+<body>
+    <h1>Hello User!</h1>
+    <div class="tab">
+        <button class="tablinks" onclick="openTask(event, 'Search')">Search</button>
+        <button class="tablinks" onclick="openTask(event, 'Checkout')">Checkout</button>
+        <button class="tablinks" onclick="openTask(event, 'Holds')">Holds</button>
+      </div>
+      
+      <!-- Tab content -->
+      <div id="Search" class="tabcontent">
+        <h3>Search</h3>
+        <input id="searchfield" type="text">
+        <button type="button" onclick="searchBooksByTitle()">Search</button>
+        
+        <table>
+            <thead>
+                <tr class="align">
+                  <th>Book Title </th>
+                  <th>Pages</th>
+                  <th>Rating</th>
+                  <th>Type</th>
+                  <th>Availability</th>
+                </tr>
+              </thead>
+              <tbody id="searchResults">
+          
+              </tbody>
+        </table>
+      </div>
+      
+      <div id="Checkout" class="tabcontent">
+        <h3>Checkout</h3>
+        <p></p>
+      </div>
+      
+      <div id="Holds" class="tabcontent">
+        <h3>Holds</h3>
+        <p></p>
+      </div>
+
+</body>
+  
+<script src="{{url_for('static', filename='user.js')}}"></script>
+
+</html>
