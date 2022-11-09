@@ -1,8 +1,15 @@
-from flask import Flask, render_template, request
 import sqlite3
 from sqlite3 import Error
 
+import flask
+from flask import Flask, render_template, request, session, redirect
+from flask_session import Session
+from flask_login import LoginManager
+
 app = Flask(__name__)
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 def openConnection(dbFile):
     conn = None
@@ -227,17 +234,175 @@ def getUserHolds(userkey):
 
     return res
 
+@app.route('/checkouthistory', methods=['GET'])
+def getCheckoutHistory():
+    res = {}
+
+    try:
+        sql = """
+            SELECT past.b_title, past_checkouts + current_checkouts as total_checkouts
+            FROM
+                (SELECT count() as past_checkouts, b_bookkey, b_title
+                FROM books, checkout_history
+                WHERE b_bookkey = ch_bookkey
+                GROUP BY b_bookkey
+                ) past,
+                (SELECT count() as current_checkouts, b_bookkey
+                FROM books, hardcopy_books
+                WHERE
+                    b_bookkey = hb_bookkey AND
+                    hb_codate NOT NULL
+                GROUP BY b_bookkey
+                ) present
+            GROUP BY past.b_bookkey
+            UNION
+            SELECT b_title, count() as total_checkouts
+            FROM books, ebook_checkout
+            WHERE b_bookkey = ec_bookkey
+            GROUP BY b_bookkey
+            ORDER BY total_checkouts DESC;"""
+
+        cur = conn.cursor()
+        cur.execute(sql)
+
+        res = cur.fetchall()
+
+    except Error as e:
+        print(e)
+
+    return res
+
+@app.route('/usersearch/<name>', methods=['GET'])
+def searchForUser(name):
+    try:
+        res = {}
+        sql = """
+            select * from user 
+            where u_name LIKE ?"""
+
+        cur = conn.cursor()
+        cur.execute(sql, ['%'+name+'%'])
+
+        res = cur.fetchall()
+
+    except Error as e:
+        print(e)
+
+    return res
+
+@app.route('/deleteuser', methods=['DELETE'])
+def deleteUser():
+    try:
+        userkey = request.json['userkey']
+        sql = """
+            DELETE FROM user
+            WHERE u_userkey = ?"""
+
+        conn.execute(sql, [userkey])
+        conn.commit()
+
+    except Error as e:
+        print(e)
+
+@app.route('/createuser', methods=['POST'])
+def createUser():
+    try:
+        name = request.json['name']
+        username = request.json['username']
+        password = request.json['password']
+        address = request.json['address']
+        phone = request.json['phone']
+        sql = """
+            INSERT INTO user VALUES ((SELECT max(u_userkey) FROM user)+1, 
+                ?, ?, ?, ?, ?, ?)"""
+
+        args = [name, username, password, session['librariankey'], address, phone]
+
+        conn.execute(sql, args)
+        conn.commit()
+    
+    except Error as e:
+        print(e)
+
+# @app.route('/updateuser/<attribute>')
+
+@app.route('/deletebook')
+def deleteBook():
+    try:
+        bookkey = request.json['bookkey']
+
+        sql = """
+            DELETE FROM books WHERE b_bookkey = ?"""
+
+        # delete from hardcopy/ebook?
+
+    except Error as e:
+        print(e)
+
 @app.route('/')
 def home():
     return render_template('home.html')
 
-@app.route('/user')
+@app.route("/logout")
+def logout():
+    session["u_userkey"] = None
+    session["u_name"] = None
+    session["l_librariankey"] = None
+    session["l_name"] = None
+    return redirect(flask.url_for('home'))
+
+@app.route('/user', methods=['GET'])
 def user():
+    if session.get('l_librariankey'):
+        return redirect('/librarian')
+    if not session.get('u_userkey'):
+        return redirect('/')
     return render_template('user.html')
 
 @app.route('/librarian')
 def librarian():
-    return None
+    if session.get('u_userkey'):
+        return redirect('/user')
+    if not session.get('l_librariankey'):
+        return redirect('/')
+    return render_template('librarian.html')
+
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    if request.method == 'POST':
+        username = request.json['username']
+        password = request.json['password']
+        sql = """
+            SELECT * FROM user WHERE u_username = ? AND u_password = ?"""
+
+        cur = conn.cursor()
+        cur.execute(sql, [username, password])
+
+        res = cur.fetchall()
+
+        if not res:
+            sql = """
+                SELECT * FROM librarian WHERE l_username = ? AND l_password = ?"""
+
+            cur = conn.cursor()
+            cur.execute(sql, [username, password])
+
+            res = cur.fetchall()
+
+            print(res)
+
+            if not res:
+                return flask.abort(404)
+            else:
+                session['l_librariankey'] = res[0][0]
+                session['l_name'] = res[0][1]
+                print(session['l_librariankey'])
+        else:
+            session['u_userkey'] = res[0][0]
+            session['u_name'] = res[0][1]
+
+        return res
+    return render_template('login.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

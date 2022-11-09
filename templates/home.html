@@ -14,4 +14,16 @@
     <a href="/getall">
         <img src="{{url_for('static', filename='images/book-icon.png')}}" width="128" height="128">
     </a>
+
+    <div>
+        <input id="username" type="text" placeholder="Username"></input>
+    </div>
+    <div>
+        <input id="password" type="text" placeholder="Password"></input>
+    </div>
+    <div>
+        <button type="button" onclick="login()">Login</button>
+    </div>
 </body>
+
+<script src="{{url_for('static', filename='user.js')}}"></script>

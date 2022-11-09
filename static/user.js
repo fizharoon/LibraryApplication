@@ -18,6 +18,24 @@ const async = true;   // asynchronous (true) or synchronous (false) – don’t 
   
 //   }
 
+function login() {
+    var newUrl = url + '/login';
+    var data = {"username": document.getElementById("username").value,
+                "password": document.getElementById("password").value};
+    xhttp.open("POST", newUrl);
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    console.log(data);
+    xhttp.onload = function() {
+        user = JSON.parse(this.response);
+        if (user[0].length === 7) {
+            window.location.href = url + "/user";
+        } else {
+            window.location.href = url + "/librarian";
+        }
+    }
+    xhttp.send(JSON.stringify(data));
+}
+
 function openTask(evt, task) {
     // Declare all variables
     var i, tabcontent, tablinks;
@@ -72,13 +90,13 @@ function searchBooksByTitle() {
         var result = "";
         for (i in data) {
             result += "<tr>";
+            if (data[i][data[i].length - 1] == 'Available') {
+                result += "<td><button onClick=\"checkOut()\">Check Out</button></td>"
+            } else {
+                result += "<td><button onClick=\"placeHold()\">Place Hold</button></td>"
+            }
             for(j in data[i]){
                 result += "<td>"+data[i][j]+"</td>";
-            }
-            if (data[i][data[i].length - 1] == 'Available') {
-                result += "<td><button>Check Out</button></td>"
-            } else {
-                result += "<td><button>Place Hold</button></td>"
             }
             
             result += "</tr>";
@@ -96,4 +114,12 @@ function currentHolds() {
 
 function currentCheckouts() {
 
+}
+
+function checkOut() {
+    console.log("check out");
+}
+
+function placeHold() {
+    console.log("place hold");
 }
