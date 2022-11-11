@@ -91,7 +91,7 @@ VALUES (69, 69, date());
 
 -- Hold removal (testing)
 DELETE FROM holds
-WHERE h_bookkey = 69 AND h_userkey = 69;
+WHERE h_bookkey = 1 AND h_userkey = 201;
 
 ----------------------------------------------------
 
@@ -252,4 +252,19 @@ update user
 set u_address = '42958 Katie Drive'
 where u_userkey = 1
 
+----------------------------------------------------
 
+-- List user's holds and whether they can be checked out now
+-- args: userkey
+SELECT b_title, h_holdplaced,
+    CASE
+    WHEN hb_userkey IS NULL
+        THEN 'Available'
+    ELSE 'Unavailable'
+    END availability
+FROM books, holds LEFT OUTER JOIN
+    (SELECT * FROM hardcopy_books WHERE hb_userkey IS NOT NULL)
+    ON h_bookkey = hb_bookkey
+WHERE
+    b_bookkey = h_bookkey AND
+    h_userkey = 69;

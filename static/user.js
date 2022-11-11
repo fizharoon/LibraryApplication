@@ -82,25 +82,27 @@ function openTask(evt, task) {
 //   }
 function searchBooksByTitle() {
     var searchParameter = document.getElementById("searchfield").value;
-    var newUrl = url + '/search/' + searchParameter;
+    var newUrl = url + '/search?keyword=' + encodeURIComponent(searchParameter);
     xhttp.open("GET", newUrl)
+
+    attributes = ['b_title', 'b_pages', 'bs_rating', 'type', 'availability'];
 
     xhttp.onload = function() {
         data = JSON.parse(this.response);
         var result = "";
-        for (i in data) {
+        data.forEach(book => {
             result += "<tr>";
-            if (data[i][data[i].length - 1] == 'Available') {
-                result += "<td><button onClick=\"checkOut()\">Check Out</button></td>"
+            if (book['availability'] == 'Available') {
+                result += "<td><button onClick=\"checkOut(" + book['b_bookkey'] + ")\">Check Out</button></td>"
             } else {
-                result += "<td><button onClick=\"placeHold()\">Place Hold</button></td>"
+                result += "<td><button onClick=\"placeHold(" + book['b_bookkey'] + ")\">Place Hold</button></td>"
             }
-            for(j in data[i]){
-                result += "<td>"+data[i][j]+"</td>";
-            }
+            attributes.forEach(attribute => {
+                result += "<td>"+book[attribute]+"</td>";
+            });
             
             result += "</tr>";
-        }
+        });
         document.getElementById("searchResults").innerHTML = result;
     }
 
@@ -116,10 +118,10 @@ function currentCheckouts() {
 
 }
 
-function checkOut() {
-    console.log("check out");
+function checkOut(book_id) {
+    console.log("check out" + book_id);
 }
 
-function placeHold() {
-    console.log("place hold");
+function placeHold(book_id) {
+    console.log("place hold" + book_id);
 }
