@@ -34,9 +34,17 @@ input[type=text] {
   /* border: 3px solid #555; */
   border: none;
   border-bottom: 2px solid RGB(34, 51, 59);
-  font-size: 15;
+  font-size: 20;
   /* place-items: center; */
   /* width:50%; */
+}
+input[type=password]{
+  width:50%;
+  height:50px;
+  /* border: 3px solid #555; */
+  border: none;
+  border-bottom: 2px solid RGB(34, 51, 59);
+  font-size: 20;
 }
 .button {
   display: block;
@@ -50,8 +58,14 @@ input[type=text] {
   text-decoration: none;
   /* display: inline-block; */
   font-size: 16px;
+  transition-duration: 0.2s;
+  border-radius: 2px;
 }
 
+button:hover{
+  background-color: rgb(21, 165, 122);
+  border-radius: 2px;
+}
 
 /* TAB FORMATTING & STYLING */
 .tab {

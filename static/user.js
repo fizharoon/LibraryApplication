@@ -4,19 +4,16 @@ const url = "http://127.0.0.1:5000";
 const async = true;   // asynchronous (true) or synchronous (false) – don’t use synchronous
 
 
-// async function getStudent() {
-//     var studentName = document.getElementById("studentNameSearch").value;
-//     var newUrl = url + "/" + studentName;
-//     xhttp.open("GET", newUrl, true);
-    
-//     xhttp.onload = function() {
-//       data = JSON.parse(this.response);
-//       document.getElementById("studentGradeSearch").value = data[studentName];
-//     };
-//     // console.log(data[studentName.value]);
-//     xhttp.send();
-  
-//   }
+// Get the input field
+var input = document.getElementById("password");
+
+input.addEventListener("keypress", function(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    document.getElementById("loginbutton").click();
+  }
+});
+
 
 function login() {
     var newUrl = url + '/login';
@@ -34,6 +31,21 @@ function login() {
         }
     }
     xhttp.send(JSON.stringify(data));
+}
+
+function logout() {
+    var newUrl = url + '/logout';
+
+    xhttp.open("POST", newUrl, true);
+
+    xhttp.onload = function() {
+        window.location.replace('/');
+    }
+
+    xhttp.send();
+
+//     xhttp.open("GET", url, true);
+//     xhttp.send()
 }
 
 function openTask(evt, task) {
@@ -57,29 +69,6 @@ function openTask(evt, task) {
     evt.currentTarget.className += " active";
 }
 
-// function printAll(){
-//     xhttp.open("GET", url, async);
-//     xhttp.onload = function() {
-//       // document.getElementById("demo").innerHTML = this.responseText;
-//       data = JSON.parse(this.response)
-//       var table = document.getElementById("table")
-//       table.innerHTML = "";
-//       for (i in Object.keys(data)) {
-//         // console.log(Object.keys(data)[i] + " " + data[Object.keys(data)[i]])
-//         var row = table.insertRow();
-//         var celluno = row.insertCell(0);
-//         var celldos = row.insertCell(1);
-//         celluno.innerHTML = Object.keys(data)[i];
-//         celldos.innerHTML = data[Object.keys(data)[i]];
-  
-//       }
-//       document.getElementById("print").innerHTML = "Update All";
-//       // console.log(this.response);
-//     };
-//     // console.log(data)
-//     xhttp.send();
-    
-//   }
 function searchBooksByTitle() {
     var searchParameter = document.getElementById("searchfield").value;
     var newUrl = url + '/search?keyword=' + encodeURIComponent(searchParameter);
@@ -90,6 +79,7 @@ function searchBooksByTitle() {
     xhttp.onload = function() {
         data = JSON.parse(this.response);
         var result = "";
+        
         data.forEach(book => {
             result += "<tr>";
             if (book['availability'] == 'Available') {
@@ -109,19 +99,92 @@ function searchBooksByTitle() {
     xhttp.send();
 }
 
-function currentHolds() {
-    var holds = document.getElementById("")
-
-}
-
 function currentCheckouts() {
+    var newUrl = url + '/usercheckouts';
+    xhttp.open("GET", newUrl)
 
+    attributes = ['b_title', 'hb_type'];
+
+    xhttp.onload = function() {
+        data = JSON.parse(this.response);
+        // console.log(data);
+        var result = "";
+        
+        data.forEach(book => {
+            result += "<tr>";
+            result += "<td><button onClick=\"returnBook(" + book['b_bookkey'] + ")\">Return</button></td>";
+            
+            attributes.forEach(attribute => {
+                result += "<td>"+book[attribute]+"</td>";
+            });
+            
+            result += "</tr>";
+        });
+        document.getElementById("checkoutTable").innerHTML = result;
+    }
+
+    xhttp.send();
 }
 
-function checkOut(book_id) {
-    console.log("check out" + book_id);
+function currentHolds() {
+    var newUrl = url + '/userholds';
+    xhttp.open("GET", newUrl)
+
+    attributes = ['b_title', 'h_holdplaced', 'availability'];
+
+    xhttp.onload = function() {
+        data = JSON.parse(this.response);
+        var result = "";
+        
+        data.forEach(book => {
+            result += "<tr>";
+            if (book['availability'] == 'Available') {
+                result += "<td><button onClick=\"checkOut(" + book['b_bookkey'] + ")\">Check Out</button></td>";
+            } else {
+                result += "<td></td>";
+            }
+            attributes.forEach(attribute => {
+                result += "<td>"+book[attribute]+"</td>";
+            });
+            
+            result += "</tr>";
+        });
+        document.getElementById("holdTable").innerHTML = result;
+    }
+
+    xhttp.send();
 }
 
-function placeHold(book_id) {
-    console.log("place hold" + book_id);
+function checkOut(bookkey) {
+    var newUrl = url + '/checkout';
+    var body = {'bookkey': bookkey};
+    xhttp.open('POST', newUrl);
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.onload = function() {
+        // console.log('hold placed ' + bookkey);
+    }
+    xhttp.send(JSON.stringify(body));
+}
+
+function returnBook(bookkey) {
+    var newUrl = url + '/return';
+    var body = {'bookkey': bookkey};
+    xhttp.open('POST', newUrl);
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.onload = function() {
+        // console.log('hold placed ' + bookkey);
+    }
+    xhttp.send(JSON.stringify(body));
+}
+
+function placeHold(bookkey) {
+    var newUrl = url + '/hold';
+    var body = {'bookkey': bookkey};
+    xhttp.open('POST', newUrl);
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.onload = function() {
+        // console.log('hold placed ' + bookkey)
+    }
+    xhttp.send(JSON.stringify(body))
+    
 }

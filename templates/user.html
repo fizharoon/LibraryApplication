@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/page.css') }}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/user.css') }}">
 </head>
 
 <body>
     <h1>Hello {{session.u_name}}! </h1>
+    <button onclick="logout()" class="logout">Log Out</button>
     <div class="tab">
-        <button class="tablinks" onclick="openTask(event, 'Search')">Search</button>
-        <button class="tablinks" onclick="openTask(event, 'Checkouts')">Checkouts</button>
-        <button class="tablinks" onclick="openTask(event, 'Holds')">Holds</button>
+        <button class="tablinks" onclick="openTask(event, 'Search');searchBooksByTitle()">Search</button>
+        <button class="tablinks" onclick="openTask(event, 'Checkouts');currentCheckouts()">Checkouts</button>
+        <button class="tablinks" onclick="openTask(event, 'Holds');currentHolds()">Holds</button>
       </div>
       
       <!-- Tab content -->
@@ -21,6 +22,7 @@
         <table>
             <thead>
                 <tr class="align">
+                  <th></th>
                   <th>Book Title</th>
                   <th>Pages</th>
                   <th>Rating</th>
@@ -36,12 +38,35 @@
       
       <div id="Checkouts" class="tabcontent">
         <h3>Checkouts</h3>
-        <p></p>
+        <table>
+          <thead>
+            <tr class="align">
+              <th></th>
+              <th>Book Title</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody id="checkoutTable">
+      
+          </tbody>
+        </table>
       </div>
       
       <div id="Holds" class="tabcontent">
         <h3>Holds</h3>
-        <p></p>
+        <table>
+        <thead>
+          <tr class="align">
+            <th></th>
+            <th>Book Title</th>
+            <th>Hold Placed</th>
+            <th>Availability</th>
+          </tr>
+        </thead>
+        <tbody id="holdTable">
+    
+        </tbody>
+      </table>
       </div>
 
 </body>

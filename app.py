@@ -116,13 +116,59 @@ def searchByTitle():
 
     return flask.jsonify(res)
 
-# @app.route('/grades/<name>', methods=['PUT'])
-# def update_grade(name):
-#     student = Grade.query.get(name)
-#     student.name = request.json['name']
-#     student.grade = request.json['grade']
-#     db.session.commit()
-#     return {student.name: student.grade}
+@app.route('/bookinfo/<bookkey>', methods=['GET'])
+def getBookInfo(bookkey):
+    res = {}
+
+    try:
+        sql = """SELECT * FROM ebooks WHERE e_bookkey = ?"""
+        cur = conn.cursor()
+        cur.execute(sql, [bookkey])
+
+        if cur.fetchall():
+            sql = """SELECT count() as total_checkouts
+                    FROM ebook_checkout
+                    WHERE ec_bookkey = ?;"""
+            cur.execute(sql, [bookkey])
+            res.update({'total_checkouts': cur.fetchone()[0]})
+        else:
+            sql = """SELECT count() as total_holds
+                FROM holds
+                WHERE h_bookkey = ?;"""
+            cur.execute(sql, [bookkey])
+            res.update({'total_holds': cur.fetchone()[0]})
+            sql = """SELECT count() as total_checkouts
+                    FROM checkout_history
+                    WHERE ch_bookkey = ?;"""
+            cur.execute(sql, [bookkey])
+            res.update({'total_checkouts': cur.fetchone()[0]})
+
+        sql = """SELECT b_bookkey, b_title, b_pages, bs_rating, hb_type
+            FROM books, book_stats, hardcopy_books
+            WHERE
+                bs_bookkey = b_bookkey AND
+                hb_bookkey = b_bookkey AND
+                b_bookkey = ?
+            UNION
+            SELECT b_bookkey, b_title, b_pages, bs_rating, e_format
+            FROM books, book_stats, ebooks
+            WHERE
+                bs_bookkey = b_bookkey AND
+                e_bookkey = b_bookkey AND
+                b_bookkey = ?;"""
+        cur.execute(sql, [bookkey, bookkey])
+
+        book = cur.fetchone()
+        res.update({'b_bookkey': book[0]})
+        res.update({'b_title': book[1]})
+        res.update({'b_pages': book[2]})
+        res.update({'bs_rating': book[3]})
+        res.update({'format': book[4]})
+    except Error as e:
+        print(e)
+
+    return render_template('bookinfo.html', book=res)
+
 @app.route('/checkout', methods=['PUT', 'POST'])
 def checkout():
     try:
@@ -185,10 +231,11 @@ def returnBook():
 
         conn.commit()
 
-        return 201
+        return {}, 201
 
     except Error as e:
         print(e)
+        return flask.abort(404)
 
 @app.route('/hold', methods=['POST'])
 def placeHold():
@@ -202,24 +249,26 @@ def placeHold():
         conn.execute(sql, [bookkey, userkey])
         conn.commit()
 
-        return 201
+        return {}, 201
 
     except Error as e:
         print(e)
+        return flask.make_response(str(e), 403)
 
 @app.route('/usercheckouts', methods=['GET'])
 def getUserCheckouts():
-    res = {}
+    res = []
+    names = ['b_bookkey', 'b_title', 'hb_type']
 
     try:
         sql = """
-            SELECT b_title, hb_type as book_format
+            SELECT b_bookkey, b_title, hb_type as book_format
             FROM hardcopy_books, books
             WHERE
                 hb_userkey = ? AND
                 hb_bookkey = b_bookkey
             UNION
-            SELECT b_title, e_format
+            SELECT b_bookkey, b_title, e_format
             FROM ebook_checkout, ebooks, books
             WHERE
                 e_bookkey = b_bookkey AND
@@ -230,20 +279,25 @@ def getUserCheckouts():
         cur = conn.cursor()
         cur.execute(sql, [session['u_userkey'], session['u_userkey']])
 
-        res = cur.fetchall()
+        for book in cur.fetchall():
+            cur = {}
+            for name, attribute in zip(names, book):
+                cur.update({name: attribute})
+            res.append(cur)
 
     except Error as e:
         print(e)
 
-    return res
+    return flask.jsonify(res)
 
 @app.route('/userholds', methods=['GET'])
 def getUserHolds():
-    res = {}
+    res = []
+    names = ['b_bookkey', 'b_title', 'h_holdplaced', 'availability']
 
     try:
         sql = """
-            SELECT b_title, h_holdplaced,
+            SELECT b_bookkey, b_title, h_holdplaced,
                 CASE
                 WHEN hb_userkey IS NULL
                     THEN 'Available'
@@ -259,12 +313,16 @@ def getUserHolds():
         cur = conn.cursor()
         cur.execute(sql, [session['u_userkey']])
 
-        res = cur.fetchall()
+        for book in cur.fetchall():
+            cur = {}
+            for name, attribute in zip(names, book):
+                cur.update({name: attribute})
+            res.append(cur)
 
     except Error as e:
         print(e)
 
-    return res
+    return flask.jsonify(res)
 
 @app.route('/checkouthistory', methods=['GET'])
 def getCheckoutHistory():
@@ -308,7 +366,9 @@ def getCheckoutHistory():
 def searchForUser():
     try:
         name = request.args.get('name')
-        res = {}
+        res = []
+        names = ['u_userkey', 'u_name', 'u_username', 'u_password', 'u_librariankey', 'u_address', 'u_phone']
+
         sql = """
             select * from user 
             where u_name LIKE ?"""
@@ -316,7 +376,11 @@ def searchForUser():
         cur = conn.cursor()
         cur.execute(sql, ['%'+name+'%'])
 
-        res = cur.fetchall()
+        for user in cur.fetchall():
+            cur = {}
+            for name, attribute in zip(names, user):
+                cur.update({name: attribute})
+            res.append(cur)
 
     except Error as e:
         print(e)
@@ -414,17 +478,16 @@ def deleteBook():
     except Error as e:
         print(e)
 
+    return {}, 204
+
 @app.route('/')
 def home():
     return render_template('home.html')
 
-@app.route("/logout")
+@app.route("/logout", methods=['GET', 'POST'])
 def logout():
-    session["u_userkey"] = None
-    session["u_name"] = None
-    session["l_librariankey"] = None
-    session["l_name"] = None
-    return redirect(flask.url_for('home'))
+    session.clear()
+    return redirect('/')
 
 @app.route('/user', methods=['GET'])
 def user():

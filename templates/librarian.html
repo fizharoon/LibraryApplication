@@ -1,7 +1,108 @@
 <!DOCTYPE html>
+<head>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/user.css') }}">
+</head>
 <h1>
     Librarian Page
 </h1>
 <h1>Hello {{session.l_name}}! </h1>
+<button onclick="logout()" class="logout">Log Out</button>
+<body>
+<div class="tab">
+    <button class="tablinks" onclick="openTask(event, 'Books');searchBooksByTitle()">Books</button>
+    <button class="tablinks" onclick="openTask(event, 'Users');searchUserByName()">Users</button>
+    <button class="tablinks" onclick="openTask(event, 'AddUser')">New User</button>
+    <button class="tablinks" onclick="openTask(event, 'AddHardcopy')">New Hardcopy</button>
+    <button class="tablinks" onclick="openTask(event, 'AddEbook')">New eBook</button>
+  </div>
+  
+  <!-- Tab content -->
+  <div id="Books" class="tabcontent">
+    <h3>Books</h3>
+    <input id="bookSearchfield" type="text">
+    <button type="button" onclick="searchBooksByTitle()">Search</button>
+    
+    <table>
+        <thead>
+            <tr class="align">
+              <th></th>
+              <th>Book Key</th>
+              <th>Book Title</th>
+              <th>Type</th>
+              <th>Availability</th>
+            </tr>
+          </thead>
+          <tbody id="bookSearchResults">
+      
+          </tbody>
+    </table>
+  </div>
+  
+  <div id="Users" class="tabcontent">
+    <h3>Users</h3>
+    <input id="userSearchfield" type="text">
+    <button type="button" onclick="searchUserByName()">Search</button>
+    <table>
+      <thead>
+        <tr class="align">
+          <th>User Key</th>
+          <th>Name</th>
+          <th>Username</th>
+          <th>Password</th>
+          <th>Added By</th>
+          <th>Address</th>
+          <th>Phone Number</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="userSearchResults">
+  
+      </tbody>
+    </table>
+  </div>
+  
+  <div id="AddUser" class="tabcontent">
+    <h3>Holds</h3>
+    <table>
+    <thead>
+      <tr class="align">
+        <th></th>
+        <th>Book Title</th>
+        <th>Hold Placed</th>
+        <th>Availability</th>
+      </tr>
+    </thead>
+    <tbody id="holdTable">
+
+    <div id="AddHardcopy" class="tabcontent">
+      <h3>Holds</h3>
+      <table>
+      <thead>
+        <tr class="align">
+          <th></th>
+          <th>Book Title</th>
+          <th>Hold Placed</th>
+          <th>Availability</th>
+        </tr>
+      </thead>
+      <tbody id="holdTable">
+
+      <div id="AddEbook" class="tabcontent">
+        <h3>Holds</h3>
+        <table>
+        <thead>
+          <tr class="align">
+            <th></th>
+            <th>Book Title</th>
+            <th>Hold Placed</th>
+            <th>Availability</th>
+          </tr>
+        </thead>
+        <tbody id="holdTable">
+
+    </tbody>
+  </table>
+  </div>
+</body>
 
 <script src="{{url_for('static', filename='librarian.js')}}"></script>
