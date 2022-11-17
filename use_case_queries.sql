@@ -19,6 +19,10 @@ WHERE
     e_bookkey = b_bookkey AND
     b_title LIKE '%computer%';
 
+SELECT *
+FROM book_search
+WHERE b_title LIKE '%computer%';
+
 ----------------------------------------------------
 
 -- Show all books in alphabetical order by title
@@ -268,3 +272,48 @@ FROM books, holds LEFT OUTER JOIN
 WHERE
     b_bookkey = h_bookkey AND
     h_userkey = 69;
+
+----------------- INDEXES -----------------
+
+CREATE INDEX ebook_checkout_idx_ec_userkey ON ebook_checkout(ec_userkey);
+CREATE INDEX hardcopy_books_idx_hb_userkey ON hardcopy_books(hb_userkey);
+
+----------------- VIEWS -----------------
+
+-- DROP VIEW book_search;
+CREATE VIEW book_search(b_bookkey, b_title, b_pages, b_rating, b_type, b_availability) AS
+SELECT b_bookkey, b_title, b_pages, bs_rating, hb_type,
+    CASE
+    WHEN hb_userkey IS NULL
+        THEN 'Available'
+    ELSE 'Unavailable'
+    END availability
+FROM books, book_stats, hardcopy_books
+WHERE
+    bs_bookkey = b_bookkey AND
+    hb_bookkey = b_bookkey
+UNION
+SELECT b_bookkey, b_title, b_pages, bs_rating, e_format, 'Available'
+FROM books, book_stats, ebooks
+WHERE
+    bs_bookkey = b_bookkey AND
+    e_bookkey = b_bookkey;
+
+CREATE VIEW book_info(b_bookkey, b_title, b_pages, b_rating, b_format, b_totalholds, b_totalcheckouts) AS
+SELECT b_bookkey, b_title, b_pages, bs_rating, hb_type, IFNULL(total_holds, 0) total_holds, IFNULL(total_checkouts, 0) total_checkouts
+FROM books, book_stats, hardcopy_books
+    LEFT OUTER JOIN
+    (SELECT h_bookkey, count() as total_holds FROM holds GROUP BY h_bookkey) tholds ON hb_bookkey = tholds.h_bookkey
+    LEFT OUTER JOIN
+    (SELECT ch_bookkey, count() as total_checkouts FROM checkout_history GROUP BY ch_bookkey) tcheckouts ON hb_bookkey = tcheckouts.ch_bookkey
+WHERE
+    b_bookkey = bs_bookkey AND
+    b_bookkey = hb_bookkey
+UNION
+SELECT b_bookkey, b_title, b_pages, bs_rating, e_format, 'n/a', total_checkouts
+FROM books, book_stats, ebooks
+    LEFT OUTER JOIN
+    (SELECT ec_bookkey, count() as total_checkouts FROM ebook_checkout GROUP BY ec_bookkey) tcheckouts ON e_bookkey = tcheckouts.ec_bookkey
+WHERE
+    b_bookkey = bs_bookkey AND
+    b_bookkey = e_bookkey;

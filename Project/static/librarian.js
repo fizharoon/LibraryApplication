@@ -87,7 +87,7 @@ function searchBooksByTitle() {
     var newUrl = url + '/search?keyword=' + encodeURIComponent(searchParameter);
     xhttp.open("GET", newUrl)
 
-    attributes = ['b_title', 'type', 'availability'];
+    attributes = ['b_title', 'b_type', 'b_availability'];
 
     xhttp.onload = function() {
         data = JSON.parse(this.response);
@@ -104,6 +104,7 @@ function searchBooksByTitle() {
         });
 
         document.getElementById("bookSearchResults").innerHTML = result;
+        document.getElementById("searchResCount").innerHTML = data.length + ' results';
     }
 
     xhttp.send();

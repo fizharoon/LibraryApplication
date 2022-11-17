@@ -1,0 +1,8 @@
+README.md
+setup.py
+Library_Database_Project.egg-info/PKG-INFO
+Library_Database_Project.egg-info/SOURCES.txt
+Library_Database_Project.egg-info/dependency_links.txt
+Library_Database_Project.egg-info/requires.txt
+Library_Database_Project.egg-info/top_level.txt
+Project/app.py

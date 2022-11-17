@@ -43,9 +43,6 @@ function logout() {
     }
 
     xhttp.send();
-
-//     xhttp.open("GET", url, true);
-//     xhttp.send()
 }
 
 function openTask(evt, task) {
@@ -71,10 +68,10 @@ function openTask(evt, task) {
 
 function searchBooksByTitle() {
     var searchParameter = document.getElementById("searchfield").value;
-    var newUrl = url + '/search?keyword=' + encodeURIComponent(searchParameter);
+    var newUrl = url + '/search'  + '/ratingdec?keyword=' + encodeURIComponent(searchParameter);
     xhttp.open("GET", newUrl)
 
-    attributes = ['b_title', 'b_pages', 'bs_rating', 'type', 'availability'];
+    attributes = ['b_title', 'b_pages', 'b_rating', 'b_type', 'b_availability'];
 
     xhttp.onload = function() {
         data = JSON.parse(this.response);
@@ -82,7 +79,7 @@ function searchBooksByTitle() {
         
         data.forEach(book => {
             result += "<tr>";
-            if (book['availability'] == 'Available') {
+            if (book['b_availability'] == 'Available') {
                 result += "<td><button onClick=\"checkOut(" + book['b_bookkey'] + ")\">Check Out</button></td>"
             } else {
                 result += "<td><button onClick=\"placeHold(" + book['b_bookkey'] + ")\">Place Hold</button></td>"
@@ -94,6 +91,7 @@ function searchBooksByTitle() {
             result += "</tr>";
         });
         document.getElementById("searchResults").innerHTML = result;
+        document.getElementById("searchResCount").innerHTML = data.length + ' results';
     }
 
     xhttp.send();

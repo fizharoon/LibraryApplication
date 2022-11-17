@@ -21,6 +21,9 @@ input[type=text]{
   margin: 5px;
 }
 
+body{
+  background-color: RGB(34, 51, 59);
+}
 
 table, th, td {
   border: 1px solid;
