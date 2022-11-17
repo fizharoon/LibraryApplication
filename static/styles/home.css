@@ -7,6 +7,9 @@
   ebony clay - 22333B RGB(34, 51, 59) */
 
   /* HOME PAGE STYLING */
+body{
+  background-color: RGB(34, 51, 59);
+}
 .box{
   background-color: RGB(234, 224, 213);
 	margin: 50px;
@@ -34,7 +37,7 @@ input[type=text] {
   /* border: 3px solid #555; */
   border: none;
   border-bottom: 2px solid RGB(34, 51, 59);
-  font-size: 20;
+  font-size: 20px;
   /* place-items: center; */
   /* width:50%; */
 }
@@ -44,7 +47,7 @@ input[type=password]{
   /* border: 3px solid #555; */
   border: none;
   border-bottom: 2px solid RGB(34, 51, 59);
-  font-size: 20;
+  font-size: 20px;
 }
 .button {
   display: block;
