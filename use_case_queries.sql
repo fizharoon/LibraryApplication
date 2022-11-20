@@ -226,7 +226,7 @@ where b_bookkey = hb_bookkey
 
 -- librarian inserts user into user table
 -- args: librarian key
-INSERT INTO user VALUES ((SELECT max(u_userkey) FROM user)+1, "Stella Chang", "schang99", "sdfeIdf", 9, '123 Sesame St', '209-555-5555')
+INSERT INTO user VALUES ((SELECT max(ch_userkey) FROM checkout_history)+1, "Stella Chang", "schang99", "sdfeIdf", 9, '123 Sesame St', '209-555-5555')
 
 ----------------------------------------------------
 
@@ -280,7 +280,7 @@ CREATE INDEX hardcopy_books_idx_hb_userkey ON hardcopy_books(hb_userkey);
 
 ----------------- VIEWS -----------------
 
--- DROP VIEW book_search;
+DROP VIEW book_search;
 CREATE VIEW book_search(b_bookkey, b_title, b_pages, b_rating, b_type, b_availability) AS
 SELECT b_bookkey, b_title, b_pages, bs_rating, hb_type,
     CASE
@@ -299,8 +299,9 @@ WHERE
     bs_bookkey = b_bookkey AND
     e_bookkey = b_bookkey;
 
-CREATE VIEW book_info(b_bookkey, b_title, b_pages, b_rating, b_format, b_totalholds, b_totalcheckouts) AS
-SELECT b_bookkey, b_title, b_pages, bs_rating, hb_type, IFNULL(total_holds, 0) total_holds, IFNULL(total_checkouts, 0) total_checkouts
+DROP VIEW book_info;
+CREATE VIEW book_info(b_bookkey, b_title, b_pages, b_rating, b_format, b_checkedOutBy, b_totalholds, b_totalcheckouts) AS
+SELECT b_bookkey, b_title, b_pages, bs_rating, hb_type, hb_userkey, IFNULL(total_holds, 0) total_holds, IFNULL(total_checkouts, 0) total_checkouts
 FROM books, book_stats, hardcopy_books
     LEFT OUTER JOIN
     (SELECT h_bookkey, count() as total_holds FROM holds GROUP BY h_bookkey) tholds ON hb_bookkey = tholds.h_bookkey
@@ -310,10 +311,43 @@ WHERE
     b_bookkey = bs_bookkey AND
     b_bookkey = hb_bookkey
 UNION
-SELECT b_bookkey, b_title, b_pages, bs_rating, e_format, 'n/a', total_checkouts
+SELECT b_bookkey, b_title, b_pages, bs_rating, e_format, 'n/a', 'n/a', total_checkouts
 FROM books, book_stats, ebooks
     LEFT OUTER JOIN
     (SELECT ec_bookkey, count() as total_checkouts FROM ebook_checkout GROUP BY ec_bookkey) tcheckouts ON e_bookkey = tcheckouts.ec_bookkey
 WHERE
     b_bookkey = bs_bookkey AND
     b_bookkey = e_bookkey;
+
+CREATE VIEW user_checkouts(b_userkey, b_bookkey, b_title, b_format, b_checkout, b_remaining) AS
+SELECT hb_userkey, b_bookkey, b_title, hb_type as book_format, hb_codate, 'n/a' as remaining
+FROM hardcopy_books, books
+WHERE
+    hb_userkey NOT NULL AND
+    hb_bookkey = b_bookkey
+UNION
+SELECT ec_userkey, b_bookkey, b_title, e_format, ec_codate,
+    ROUND(JULIANDAY(ec_codate, e_loanperiod) - JULIANDAY(DATE())) as remaining
+FROM ebook_checkout, ebooks, books
+WHERE
+    e_bookkey = b_bookkey AND
+    ec_bookkey = e_bookkey AND
+    DATE(ec_codate, e_loanperiod) > DATE();
+
+SELECT book_search.*,
+    CASE
+    WHEN SQ1.b_userkey IS NULL
+        THEN FALSE
+    ELSE TRUE
+    END isCheckedOut,
+    CASE
+    WHEN SQ2.h_userkey IS NULL
+        THEN FALSE
+    ELSE TRUE
+    END isHeld
+FROM book_search LEFT JOIN
+    (SELECT * FROM user_checkouts WHERE b_userkey = 1) SQ1
+        ON book_search.b_bookkey = SQ1.b_bookkey
+    LEFT JOIN
+    (SELECT * FROM holds WHERE h_userkey = 1) SQ2
+        ON book_search.b_bookkey = SQ2.h_bookkey;

@@ -52,7 +52,7 @@ def getAllBooks(sort):
 @app.route('/bookinfo/<bookkey>', methods=['GET'])
 def getBookInfo(bookkey):
     res = {}
-    names = ['b_bookkey', 'b_title', 'b_pages', 'b_rating', 'b_format', 'b_totalholds', 'b_totalcheckouts']
+    names = ['b_bookkey', 'b_title', 'b_pages', 'b_rating', 'b_format', 'b_checkedOutBy', 'b_totalholds', 'b_totalcheckouts']
     cur = conn.cursor()
 
     try:
@@ -151,7 +151,7 @@ def deleteUser():
 def createUser():
     try:
         cur = conn.cursor()
-        newUserKey = cur.execute("SELECT max(u_userkey) FROM user").fetchone()[0] + 1
+        newUserKey = cur.execute("SELECT max(ch_userkey) FROM checkout_history").fetchone()[0] + 1
 
         name = request.json['u_name']
         username = request.json['u_username']
@@ -211,15 +211,76 @@ def updateUser(userkey):
 def deleteBook():
     try:
         bookkey = request.json['b_bookkey']
-        sql = """
-            DELETE FROM books WHERE b_bookkey = ?;
-            DELETE FROM hardcopy_books WHERE hb_bookkey = ?;
-            DELETE FROM ebooks WHERE e_bookkey = ?;"""
+        sqls = ["DELETE FROM books WHERE b_bookkey = ?;",
+            "DELETE FROM book_stats WHERE bs_bookkey = ?",
+            "DELETE FROM hardcopy_books WHERE hb_bookkey = ?;",
+            "DELETE FROM ebooks WHERE e_bookkey = ?;"]
 
-        conn.execute(sql, [bookkey, bookkey, bookkey])
+        for sql in sqls:
+            conn.execute(sql, [bookkey])
         conn.commit()
 
     except Error as e:
         print(e)
 
     return {}, 204
+
+@app.route('/addebook', methods=['POST'])
+def add_eBook():
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT max(b_bookkey) FROM books")
+
+        b_bookkey = cur.fetchone()[0] + 1
+        b_title = request.json['b_title']
+        b_pages = request.json['b_pages']
+        b_librarian = session['l_librariankey']
+        bs_rating = request.json['bs_rating']
+        bs_reviews = request.json['bs_reviews']
+        bs_price = request.json['bs_price']
+
+        conn.execute("INSERT INTO books VALUES(?, ?, ?, ?)",
+            [b_bookkey, b_title, b_pages, b_librarian])
+        conn.execute("INSERT INTO book_stats VALUES(?, ?, ?, ?)",
+            [b_bookkey, bs_rating, bs_reviews, bs_price])
+
+        e_format = request.json['e_format']
+
+        conn.execute("INSERT INTO ebooks VALUES(?, ?, ?)",
+            [b_bookkey, '1000 days', e_format])
+        
+        conn.commit()
+    except Error as e:
+        print(e)
+
+    return request.json
+
+@app.route('/addhardcopybook', methods=['POST'])
+def add_hardcopyBook():
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT max(b_bookkey) FROM books")
+
+        b_bookkey = cur.fetchone()[0] + 1
+        b_title = request.json['b_title']
+        b_pages = request.json['b_pages']
+        b_librarian = session['l_librariankey']
+        bs_rating = request.json['bs_rating']
+        bs_reviews = request.json['bs_reviews']
+        bs_price = request.json['bs_price']
+
+        conn.execute("INSERT INTO books VALUES(?, ?, ?, ?)",
+            [b_bookkey, b_title, b_pages, b_librarian])
+        conn.execute("INSERT INTO book_stats VALUES(?, ?, ?, ?)",
+            [b_bookkey, bs_rating, bs_reviews, bs_price])
+
+        hb_type = request.json['hb_type']
+
+        conn.execute("INSERT INTO hardcopy_books VALUES(?, NULL, NULL, ?)",
+            [b_bookkey, hb_type])
+        
+        conn.commit()
+    except Error as e:
+        print(e)
+
+    return request.json

@@ -24,6 +24,11 @@ function openTask(evt, task) {
     evt.currentTarget.className += " active";
 }
 
+function updateTables() {
+    document.getElementById("bookSearchResults").innerHTML.reload;
+    document.getElementById("userSearchResults").innerHTML.reload;
+}
+
 function logout() {
     var newUrl = url + '/logout';
 
@@ -74,8 +79,16 @@ function updateUser() {
     xhttp.send(JSON.stringify(data));
 }
 
-function deleteUser() {
-
+function deleteUser(userkey) {
+    let newUrl = url + '/deleteuser';
+    let data = {'u_userkey': userkey};
+    xhttp.open('DELETE', newUrl);
+    xhttp.onload = function() {
+        searchUserByName();
+        updateTables();
+    }
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.send(JSON.stringify(data));
 }
 
 function createUser() {
@@ -114,8 +127,16 @@ function updateBook() {
 
 }
 
-function deleteBook() {
-
+function deleteBook(bookkey) {
+    let newUrl = url + '/deletebook';
+    let body = {'b_bookkey': bookkey};
+    xhttp.open('DELETE', newUrl);
+    xhttp.onload = function() {
+        searchBooksByTitle();
+        updateTables();
+    }
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.send(JSON.stringify(body));
 }
 
 function createBook() {

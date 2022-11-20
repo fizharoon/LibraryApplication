@@ -17,15 +17,36 @@ def searchByTitle(sort):
         sort = 'b_rating DESC'
 
     res = []
-    names = ['b_bookkey', 'b_title', 'b_pages', 'b_rating', 'b_type', 'b_availability']
+    names = ['b_bookkey', 'b_title', 'b_pages', 'b_rating', 'b_type', 'b_availability', 'isCheckedOut', 'isHeld']
     try:
-        sql = """
-            SELECT *
-            FROM book_search
-            WHERE b_title LIKE ?
-            ORDER BY {};""".format(sort)
-        parameter = '%'+keyword+'%'
-        args = [parameter]
+        if session.get('u_userkey'):
+            sql = """
+                SELECT book_search.*,
+                    CASE
+                    WHEN SQ1.b_userkey IS NULL
+                        THEN FALSE
+                    ELSE TRUE
+                    END isCheckedOut,
+                    CASE
+                    WHEN SQ2.h_userkey IS NULL
+                        THEN FALSE
+                    ELSE TRUE
+                    END isHeld
+                FROM book_search LEFT JOIN
+                    (SELECT * FROM user_checkouts WHERE b_userkey = ?) SQ1
+                        ON book_search.b_bookkey = SQ1.b_bookkey
+                    LEFT JOIN
+                    (SELECT * FROM holds WHERE h_userkey = ?) SQ2
+                        ON book_search.b_bookkey = SQ2.h_bookkey
+                WHERE book_search.b_title LIKE ?
+                ORDER BY {};""".format(sort)
+            parameter = '%'+keyword+'%'
+            args = [session['u_userkey'], session['u_userkey'], parameter]
+        else:
+            sql = """
+                SELECT * FROM book_search WHERE b_title LIKE ?
+                ORDER BY {}""".format(sort)
+            args = ['%'+keyword+'%']
 
         cur = conn.cursor()
         cur.execute(sql, args)
@@ -134,26 +155,15 @@ def placeHold():
 @app.route('/usercheckouts', methods=['GET'])
 def getUserCheckouts():
     res = []
-    names = ['b_bookkey', 'b_title', 'hb_type']
+    names = ['b_userkey', 'b_bookkey', 'b_title', 'b_format', 'b_checkout', 'b_remaining']
 
     try:
         sql = """
-            SELECT b_bookkey, b_title, hb_type as book_format
-            FROM hardcopy_books, books
-            WHERE
-                hb_userkey = ? AND
-                hb_bookkey = b_bookkey
-            UNION
-            SELECT b_bookkey, b_title, e_format
-            FROM ebook_checkout, ebooks, books
-            WHERE
-                e_bookkey = b_bookkey AND
-                ec_bookkey = e_bookkey AND
-                ec_userkey = ? AND
-                DATE(ec_codate, e_loanperiod) > DATE();"""
+            SELECT * FROM user_checkouts WHERE b_userkey = ?
+            ORDER BY b_checkout"""
 
         cur = conn.cursor()
-        cur.execute(sql, [session['u_userkey'], session['u_userkey']])
+        cur.execute(sql, [session['u_userkey']])
 
         for book in cur.fetchall():
             cur = {}

@@ -102,7 +102,8 @@ INSERT INTO hardcopy_books (hb_bookkey, hb_type)
 SELECT b_bookkey, type
 FROM books, import
 WHERE b_title = book_title AND
-    type IN ('Hardcover', 'Paperback', 'Unknown Binding');
+    b_bookkey NOT IN (SELECT hb_bookkey FROM hardcopy_books) AND
+    type IN ('Hardcover', 'Paperback', 'Unknown Binding', 'Boxed Set - Hardcover');
 
 -- Put all ebooks into a table
 INSERT INTO ebooks (e_bookkey, e_format)
