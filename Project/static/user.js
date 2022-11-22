@@ -90,6 +90,7 @@ function searchBooksByTitle() {
                 } else {
                     result += "<td><button onClick=\"checkOut(" + book['b_bookkey'] + ")\">Check Out</button></td>"
                 }
+                result += "<td><button class=\"chold\" onClick=\"checkOut(" + book['b_bookkey'] + ")\">Check Out</button></td>"
             } else {
                 if (book['isHeld']) {
                     result += "<td>Held</button></td>"
@@ -98,6 +99,7 @@ function searchBooksByTitle() {
                 } else {
                     result += "<td><button onClick=\"placeHold(" + book['b_bookkey'] + ")\">Place Hold</button></td>"
                 }
+                result += "<td><button class=\"chold\" onClick=\"placeHold(" + book['b_bookkey'] + ")\">Place Hold</button></td>"
             }
             attributes.forEach(attribute => {
                 result += "<td>"+book[attribute]+"</td>";
@@ -124,6 +126,7 @@ function currentCheckouts() {
         
         data.forEach(book => {
             result += "<tr>";
+            result += "<td><button onClick=\"returnBook(" + book['b_bookkey'] + ")\">Return</button></td>";
             
             attributes.forEach(attribute => {
                 result += "<td>"+book[attribute]+"</td>";
@@ -210,16 +213,4 @@ function placeHold(bookkey) {
     }
     xhttp.send(JSON.stringify(body))
     
-}
-
-function cancelHold(bookkey) {
-    var newUrl = url + '/cancelhold';
-    var body = {'bookkey': bookkey};
-    xhttp.open('PUT', newUrl);
-    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.onload = function() {
-        currentHolds();
-        updateTables();
-    }
-    xhttp.send(JSON.stringify(body))
 }

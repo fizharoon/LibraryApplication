@@ -17,13 +17,22 @@
       <div id="Search" class="tabcontent">
         <h3>Search</h3>
         <input id="searchfield" type="text">
-        <button type="button" onclick="searchBooksByTitle()">Search</button>
-        <div id="searchResCount" style="color: RGB(234, 224, 213)"></div>
+       
+        <button type="button" class="searchbutton"onclick="searchBooksByTitle()"> 
+        Search</button>
+        <div id="searchResCount"></div>
+        <!--<img src="{{url_for('static', filename='images/search-icon.png')}}" >-->
+        <!-- <form class="search-bar">
+          <input id="searchfield" required >
+          <button class="search-btn" type="button "onclick="searchBooksByTitle()" >
+            <span>Search</span>
+          </button>
+        </form> -->
         <table>
             <thead>
                 <tr class="align">
                   <th></th>
-                  <th>Book Title &emsp;<i class="arrow up"></i></th>
+                  <th>Book Title &emsp;<i id="sort" class="arrow up" onclick="toggleClass(this)"></i></th>
                   <th>Pages</th>
                   <th>Rating</th>
                   <th>Type</th>
@@ -68,6 +77,7 @@
     
         </tbody>
       </table>
+      
       </div>
 
 </body>
