@@ -69,6 +69,7 @@ CREATE TABLE holds(
     h_bookkey       INTEGER(270),
     h_userkey       INTEGER(200),
     h_holdplaced    DATETIME,
+    h_status        VARCHAR(10),
     UNIQUE(h_bookkey, h_userkey, h_holdplaced)
 );
 

@@ -146,7 +146,7 @@ function currentHolds() {
     var newUrl = url + '/userholds';
     xhttp.open("GET", newUrl)
 
-    attributes = ['b_title', 'h_holdplaced', 'availability'];
+    attributes = ['b_title', 'b_holdplaced', 'b_availability'];
 
     xhttp.onload = function() {
         data = JSON.parse(this.response);
@@ -154,10 +154,10 @@ function currentHolds() {
         
         data.forEach(book => {
             result += "<tr>";
-            if (book['availability'] == 'Available') {
-                result += "<td><button onClick=\"checkOut(" + book['b_bookkey'] + ")\">Check Out</button></td>";
+            if (book['b_availability'] == 'Available') {
+                result += "<td><button onclick=\"checkOut(" + book['b_bookkey'] + ")\">Check Out</button></td>";
             } else {
-                result += "<td></td>";
+                result += "<td><button onclick=\"cancelHold(" + book['b_bookkey'] + ")\">Cancel Hold</td>";
             }
             attributes.forEach(attribute => {
                 result += "<td>"+book[attribute]+"</td>";
@@ -178,6 +178,7 @@ function checkOut(bookkey) {
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.onload = function() {
         searchBooksByTitle();
+        currentHolds();
         updateTables();
     }
     xhttp.send(JSON.stringify(body));
@@ -203,7 +204,22 @@ function placeHold(bookkey) {
     xhttp.onload = function() {
         searchBooksByTitle();
         updateTables();
+        if (!this.response.ok) {
+            console.log("Error: Cannot hold the same book more than once per day");
+        }
     }
     xhttp.send(JSON.stringify(body))
     
+}
+
+function cancelHold(bookkey) {
+    var newUrl = url + '/cancelhold';
+    var body = {'bookkey': bookkey};
+    xhttp.open('PUT', newUrl);
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.onload = function() {
+        currentHolds();
+        updateTables();
+    }
+    xhttp.send(JSON.stringify(body))
 }

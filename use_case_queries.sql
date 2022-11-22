@@ -334,6 +334,22 @@ WHERE
     ec_bookkey = e_bookkey AND
     DATE(ec_codate, e_loanperiod) > DATE();
 
+DROP VIEW user_holds;
+CREATE VIEW user_holds(b_userkey, b_bookkey, b_title, b_holdplaced, b_availability) AS
+SELECT h_userkey, b_bookkey, b_title, h_holdplaced,
+    CASE
+    WHEN hb_userkey IS NULL
+        THEN 'Available'
+    ELSE 'Unavailable'
+    END availability
+FROM books, holds LEFT OUTER JOIN
+    (SELECT * FROM hardcopy_books WHERE hb_userkey IS NOT NULL)
+    ON h_bookkey = hb_bookkey
+WHERE
+    h_status = 'ACTIVE' AND
+    b_bookkey = h_bookkey
+ORDER BY h_holdplaced;
+
 SELECT book_search.*,
     CASE
     WHEN SQ1.b_userkey IS NULL

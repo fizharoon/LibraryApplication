@@ -36,7 +36,7 @@ def searchByTitle(sort):
                     (SELECT * FROM user_checkouts WHERE b_userkey = ?) SQ1
                         ON book_search.b_bookkey = SQ1.b_bookkey
                     LEFT JOIN
-                    (SELECT * FROM holds WHERE h_userkey = ?) SQ2
+                    (SELECT * FROM holds WHERE h_userkey = ? AND h_status = 'ACTIVE') SQ2
                         ON book_search.b_bookkey = SQ2.h_bookkey
                 WHERE book_search.b_title LIKE ?
                 ORDER BY {};""".format(sort)
@@ -91,10 +91,18 @@ def checkout():
                     hb_userkey = ?,
                     hb_codate = DATE()
                 WHERE hb_bookkey = ?;"""
+            sql2 = """
+                UPDATE holds
+                SET h_status = 'FILLED'
+                WHERE
+                    h_userkey = ? AND
+                    h_bookkey = ?"""
             response = {bookkey: cur.execute("SELECT * FROM hardcopy_books WHERE hb_bookkey = {}".format(bookkey)).fetchone()}
 
         args = [userkey, bookkey]
         conn.execute(sql, args)
+        if sql2:
+            conn.execute(sql2, args)
         conn.commit()
 
         return response, 201
@@ -140,8 +148,29 @@ def placeHold():
         userkey = session['u_userkey']
         bookkey = request.json['bookkey']
         sql = """
-            INSERT INTO holds (h_bookkey, h_userkey, h_holdplaced)
-            VALUES (?, ?, date());"""
+            INSERT INTO holds (h_bookkey, h_userkey, h_holdplaced, h_status)
+            VALUES (?, ?, date(), 'ACTIVE');"""
+
+        conn.execute(sql, [bookkey, userkey])
+        conn.commit()
+
+        return {}, 201
+
+    except Error as e:
+        print(e)
+        return make_response(str(e), 403)
+
+@app.route('/cancelhold', methods=['PUT'])
+def cancelHold():
+    try:
+        userkey = session['u_userkey']
+        bookkey = request.json['bookkey']
+        sql = """
+            UPDATE holds
+            SET h_status = 'CANCELLED'
+            WHERE
+                h_bookkey = ? AND
+                h_userkey = ?;"""
 
         conn.execute(sql, [bookkey, userkey])
         conn.commit()
@@ -179,22 +208,11 @@ def getUserCheckouts():
 @app.route('/userholds', methods=['GET'])
 def getUserHolds():
     res = []
-    names = ['b_bookkey', 'b_title', 'h_holdplaced', 'availability']
+    names = ['b_userkey', 'b_bookkey', 'b_title', 'b_holdplaced', 'b_availability']
 
     try:
         sql = """
-            SELECT b_bookkey, b_title, h_holdplaced,
-                CASE
-                WHEN hb_userkey IS NULL
-                    THEN 'Available'
-                ELSE 'Unavailable'
-                END availability
-            FROM books, holds LEFT OUTER JOIN
-                (SELECT * FROM hardcopy_books WHERE hb_userkey IS NOT NULL)
-                ON h_bookkey = hb_bookkey
-            WHERE
-                b_bookkey = h_bookkey AND
-                h_userkey = ?;"""
+            SELECT * FROM user_holds WHERE b_userkey = ?;"""
 
         cur = conn.cursor()
         cur.execute(sql, [session['u_userkey']])
