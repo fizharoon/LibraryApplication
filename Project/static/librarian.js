@@ -46,7 +46,7 @@ function searchUserByName() {
     var newUrl = url + '/usersearch?name=' + encodeURIComponent(searchParameter);
     xhttp.open("GET", newUrl)
 
-    attributes = ['u_userkey', 'u_name', 'u_username', 'u_password', 'u_librariankey', 'u_address', 'u_phone'];
+    attributes = ['u_userkey', 'u_name', 'u_username', 'u_password', 'u_librariankey', 'u_address', 'u_phone', 'u_pastcheckouts', 'u_curcheckouts', 'u_curholds'];
 
     xhttp.onload = function() {
         data = JSON.parse(this.response);

@@ -367,3 +367,31 @@ FROM book_search LEFT JOIN
     LEFT JOIN
     (SELECT * FROM holds WHERE h_userkey = 1) SQ2
         ON book_search.b_bookkey = SQ2.h_bookkey;
+
+CREATE VIEW user_info(u_userkey, u_name, u_username, u_password, u_librariankey, u_address, u_phone, u_pastcheckouts, u_curcheckouts, u_curholds) AS
+SELECT user.*,
+    IFNULL(past_checkouts, 0) as past_checkouts,
+    IFNULL(current_checkouts + ebook_checkouts, 0) as current_checkouts,
+    IFNULL(cur_holds, 0) as cur_holds
+FROM user LEFT OUTER JOIN
+    (SELECT ch_userkey, count() past_checkouts
+        FROM checkout_history GROUP BY ch_userkey)
+        ON u_userkey = ch_userkey LEFT OUTER JOIN
+    (SELECT hb_userkey, count() current_checkouts
+        FROM hardcopy_books GROUP BY hb_userkey)
+        ON u_userkey = hb_userkey LEFT OUTER JOIN
+    (SELECT ec_userkey, count() ebook_checkouts
+        FROM ebook_checkout GROUP BY ec_userkey)
+        ON u_userkey = ec_userkey LEFT OUTER JOIN
+    (SELECT h_userkey, count() cur_holds
+        FROM holds GROUP BY h_userkey)
+        ON u_userkey = h_userkey;
+
+
+SELECT *
+FROM checkout_history
+WHERE ch_userkey = 69;
+
+SELECT *
+FROM hardcopy_books
+WHERE hb_userkey = 69;
