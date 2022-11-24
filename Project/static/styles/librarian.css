@@ -1,9 +1,16 @@
 
-.searchbutton{
-    width: 100 px;
-    height: 50 px;
+.searchbutton {
+    background-color:blue;
+    top: 50%;
+    width: 90px;
+    height: 35px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 15px;
+ 
+
   }
-  
+
+
   /* SORTING ARROWS */
   
   .arrow {
