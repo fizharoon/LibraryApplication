@@ -387,11 +387,13 @@ FROM user LEFT OUTER JOIN
         FROM holds GROUP BY h_userkey)
         ON u_userkey = h_userkey;
 
-
-SELECT *
-FROM checkout_history
-WHERE ch_userkey = 69;
-
-SELECT *
-FROM hardcopy_books
-WHERE hb_userkey = 69;
+SELECT max(userkey)
+FROM
+    (SELECT max(u_userkey) as userkey FROM user
+    UNION
+    SELECT max(ch_userkey) as userkey FROM checkout_history
+    UNION
+    SELECT max(ec_userkey) as userkey FROM ebook_checkout
+    UNION
+    SELECT max(h_userkey) as userkey FROM holds
+    )

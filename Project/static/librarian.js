@@ -92,7 +92,26 @@ function deleteUser(userkey) {
 }
 
 function createUser() {
+    let newUrl = url + '/createuser';
+    let data = {
+        "u_name": document.getElementById("u_name").value,
+        "u_username": document.getElementById("u_username").value,
+        "u_password": document.getElementById("u_password").value,
+        "u_address": document.getElementById("u_address").value,
+        "u_phone": document.getElementById("u_phone").value
+    }
 
+    xhttp.open("POST", newUrl);
+    xhttp.onload = function() {
+        document.getElementById("u_name").value = "";
+        document.getElementById("u_username").value = "";
+        document.getElementById("u_password").value = "";
+        document.getElementById("u_address").value = "";
+        document.getElementById("u_phone").value = "";
+    }
+
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.send(JSON.stringify(data));
 }
 
 function searchBooksByTitle() {

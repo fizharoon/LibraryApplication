@@ -1,6 +1,6 @@
 from sqlite3 import Error
 
-from flask import render_template, request, session
+from flask import render_template, request, session, make_response
 
 from Project import app
 from Project.dbconn import conn
@@ -151,7 +151,17 @@ def deleteUser():
 def createUser():
     try:
         cur = conn.cursor()
-        newUserKey = cur.execute("SELECT max(ch_userkey) FROM checkout_history").fetchone()[0] + 1
+        newUserKey = cur.execute("""
+            SELECT max(userkey)
+            FROM
+                (SELECT max(u_userkey) as userkey FROM user
+                UNION
+                SELECT max(ch_userkey) as userkey FROM checkout_history
+                UNION
+                SELECT max(ec_userkey) as userkey FROM ebook_checkout
+                UNION
+                SELECT max(h_userkey) as userkey FROM holds
+                )""").fetchone()[0] + 1
 
         name = request.json['u_name']
         username = request.json['u_username']
@@ -168,7 +178,7 @@ def createUser():
         conn.execute(sql, args)
         conn.commit()
 
-        return {newUserKey: args[1:]}
+        return {newUserKey: args[1:]}, 201
     
     except Error as e:
         print(e)

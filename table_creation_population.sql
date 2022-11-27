@@ -37,15 +37,17 @@ CREATE TABLE book_stats(
 
 CREATE TABLE hardcopy_books(
     hb_bookkey      INTEGER(270) PRIMARY KEY,
-    hb_userkey      INTEGER(200),
+    hb_userkey      INTEGER(200) REFERENCES user(u_userkey),
     hb_codate       DATETIME,
-    hb_type         VARCHAR(50)
+    hb_type         VARCHAR(50),
+    CHECK (hb_type IN ('Hardcover', 'Paperback', 'Unknown Binding', 'Boxed Set - Hardcover'))
 );
 
 CREATE TABLE ebooks(
     e_bookkey       INTEGER(270) PRIMARY KEY,
-    e_loanperiod    INTEGER(30),
-    e_format        VARCHAR(50)
+    e_loanperiod    INTEGER(30) DEFAULT '1000 days',
+    e_format        VARCHAR(50),
+    CHECK (e_format in ('ebook', 'Kindle Edition'))
 );
 
 CREATE TABLE user(
@@ -66,23 +68,23 @@ CREATE TABLE librarian(
 );
 
 CREATE TABLE holds(
-    h_bookkey       INTEGER(270),
-    h_userkey       INTEGER(200),
+    h_bookkey       INTEGER(270) REFERENCES hardcopy_books(hb_bookkey),
+    h_userkey       INTEGER(200) REFERENCES user(u_userkey),
     h_holdplaced    DATETIME,
-    h_status        VARCHAR(10),
+    h_status        VARCHAR(10) DEFAULT 'ACTIVE',
     UNIQUE(h_bookkey, h_userkey, h_holdplaced)
 );
 
 CREATE TABLE ebook_checkout(
-    ec_bookkey      INTEGER(270),
-    ec_userkey      INTEGER(270),
+    ec_bookkey      INTEGER(270) REFERENCES ebooks(e_bookkey),
+    ec_userkey      INTEGER(270) REFERENCES user(u_userkey),
     ec_codate       DATETIME,
     UNIQUE(ec_bookkey, ec_userkey, ec_codate)
 );
 
 CREATE TABLE checkout_history(
-    ch_bookkey      INTEGER(270),
-    ch_userkey      INTEGER(200),
+    ch_bookkey      INTEGER(270) REFERENCES hardcopy_books(hb_bookkey),
+    ch_userkey      INTEGER(200) REFERENCES user(u_userkey),
     ch_codate       DATETIME,
     ch_cidate       DATETIME,
     UNIQUE(ch_bookkey, ch_userkey, ch_codate, ch_cidate)

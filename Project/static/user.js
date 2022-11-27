@@ -88,18 +88,18 @@ function searchBooksByTitle() {
                 if (book['isCheckedOut']) {
                     result += "<td>Checked Out</button></td>"
                 } else {
-                    result += "<td><button onClick=\"checkOut(" + book['b_bookkey'] + ")\">Check Out</button></td>"
+                    result += "<td><button class=\"chold\" onClick=\"checkOut(" + book['b_bookkey'] + ")\">Check Out</button></td>"
                 }
-                result += "<td><button class=\"chold\" onClick=\"checkOut(" + book['b_bookkey'] + ")\">Check Out</button></td>"
+                // result += "<td><button class=\"chold\" onClick=\"checkOut(" + book['b_bookkey'] + ")\">Check Out</button></td>"
             } else {
                 if (book['isHeld']) {
                     result += "<td>Held</button></td>"
                 } else if (book['isCheckedOut']) {
                     result += "<td>Checked Out</button></td>"
                 } else {
-                    result += "<td><button onClick=\"placeHold(" + book['b_bookkey'] + ")\">Place Hold</button></td>"
+                    result += "<td><button class=\"chold\" onClick=\"placeHold(" + book['b_bookkey'] + ")\">Place Hold</button></td>"
                 }
-                result += "<td><button class=\"chold\" onClick=\"placeHold(" + book['b_bookkey'] + ")\">Place Hold</button></td>"
+                // result += "<td><button class=\"chold\" onClick=\"placeHold(" + book['b_bookkey'] + ")\">Place Hold</button></td>"
             }
             attributes.forEach(attribute => {
                 result += "<td>"+book[attribute]+"</td>";
@@ -126,16 +126,15 @@ function currentCheckouts() {
         
         data.forEach(book => {
             result += "<tr>";
-            result += "<td><button onClick=\"returnBook(" + book['b_bookkey'] + ")\">Return</button></td>";
             
+            if (book['b_remaining'] == 'n/a')
+                result += "<td><button class=\"chold\" onClick=\"returnBook(" + book['b_bookkey'] + ")\">Return</button></td>";
+            else
+                result += "<td>" + book['b_remaining'] + " days remaining</td>"
+
             attributes.forEach(attribute => {
                 result += "<td>"+book[attribute]+"</td>";
             });
-
-            if (book['b_remaining'] == 'n/a')
-                result += "<td><button onClick=\"returnBook(" + book['b_bookkey'] + ")\">Return</button></td>";
-            else
-                result += "<td>" + book['b_remaining'] + " days remaining</td>"
             
             result += "</tr>";
         });
@@ -158,9 +157,9 @@ function currentHolds() {
         data.forEach(book => {
             result += "<tr>";
             if (book['b_availability'] == 'Available') {
-                result += "<td><button onclick=\"checkOut(" + book['b_bookkey'] + ")\">Check Out</button></td>";
+                result += "<td><button class=\"chold\" onclick=\"checkOut(" + book['b_bookkey'] + ")\">Check Out</button></td>";
             } else {
-                result += "<td><button onclick=\"cancelHold(" + book['b_bookkey'] + ")\">Cancel Hold</td>";
+                result += "<td><button class=\"chold\" onclick=\"cancelHold(" + book['b_bookkey'] + ")\">Cancel Hold</td>";
             }
             attributes.forEach(attribute => {
                 result += "<td>"+book[attribute]+"</td>";

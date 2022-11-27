@@ -72,6 +72,7 @@ def checkout():
         bookkey = request.json['bookkey']
 
         sql = """SELECT * FROM ebooks WHERE e_bookkey = ?"""
+        sql2 = None
         cur = conn.cursor()
         cur.execute(sql, [bookkey])
 
