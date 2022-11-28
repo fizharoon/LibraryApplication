@@ -254,10 +254,11 @@ def add_eBook():
         conn.execute("INSERT INTO book_stats VALUES(?, ?, ?, ?)",
             [b_bookkey, bs_rating, bs_reviews, bs_price])
 
+        e_loanperiod = request.json['e_loanperiod']
         e_format = request.json['e_format']
 
         conn.execute("INSERT INTO ebooks VALUES(?, ?, ?)",
-            [b_bookkey, '1000 days', e_format])
+            [b_bookkey, e_loanperiod, e_format])
         
         conn.commit()
     except Error as e:

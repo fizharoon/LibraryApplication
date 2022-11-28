@@ -301,8 +301,9 @@ WHERE
 
 DROP VIEW book_info;
 CREATE VIEW book_info(b_bookkey, b_title, b_pages, b_rating, b_format, b_checkedOutBy, b_totalholds, b_totalcheckouts) AS
-SELECT b_bookkey, b_title, b_pages, bs_rating, hb_type, hb_userkey, IFNULL(total_holds, 0) total_holds, IFNULL(total_checkouts, 0) total_checkouts
+SELECT b_bookkey, b_title, b_pages, bs_rating, hb_type, u_name || ' (' || hb_userkey || ')', IFNULL(total_holds, 0) total_holds, IFNULL(total_checkouts, 0) total_checkouts
 FROM books, book_stats, hardcopy_books
+    LEFT OUTER JOIN user ON hb_userkey = u_userkey
     LEFT OUTER JOIN
     (SELECT h_bookkey, count() as total_holds FROM holds GROUP BY h_bookkey) tholds ON hb_bookkey = tholds.h_bookkey
     LEFT OUTER JOIN
@@ -368,10 +369,11 @@ FROM book_search LEFT JOIN
     (SELECT * FROM holds WHERE h_userkey = 1) SQ2
         ON book_search.b_bookkey = SQ2.h_bookkey;
 
+DROP VIEW user_info;
 CREATE VIEW user_info(u_userkey, u_name, u_username, u_password, u_librariankey, u_address, u_phone, u_pastcheckouts, u_curcheckouts, u_curholds) AS
 SELECT user.*,
     IFNULL(past_checkouts, 0) as past_checkouts,
-    IFNULL(current_checkouts + ebook_checkouts, 0) as current_checkouts,
+    IFNULL(current_checkouts, 0) + IFNULL(ebook_checkouts, 0) as current_checkouts,
     IFNULL(cur_holds, 0) as cur_holds
 FROM user LEFT OUTER JOIN
     (SELECT ch_userkey, count() past_checkouts

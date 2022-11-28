@@ -110,6 +110,11 @@ function createUser() {
         document.getElementById("u_phone").value = "";
     }
 
+    for (key in data) {
+        if (data[key] === '')
+            return 400
+    }
+
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.send(JSON.stringify(data));
 }
@@ -158,8 +163,66 @@ function deleteBook(bookkey) {
     xhttp.send(JSON.stringify(body));
 }
 
-function createBook() {
+function createEBook() {
+    let newUrl = url + '/addebook';
+    let data = {
+        "b_title": document.getElementById("eb_title").value,
+        "b_pages": document.getElementById("eb_pages").value,
+        "bs_rating": document.getElementById("ebs_rating").value,
+        "bs_reviews": document.getElementById("ebs_reviews").value,
+        "bs_price": document.getElementById("ebs_price").value,
+        "e_format": document.getElementById("e_format").value,
+        "e_loanperiod": document.getElementById("e_loanperiod").value
+    }
 
+    xhttp.open("POST", newUrl);
+    xhttp.onload = function() {
+        document.getElementById("eb_title").value = "";
+        document.getElementById("eb_pages").value = "";
+        document.getElementById("ebs_rating").value = "";
+        document.getElementById("ebs_reviews").value = "";
+        document.getElementById("ebs_price").value = "";
+        document.getElementById("e_format").value = "";
+        document.getElementById("e_loanperiod").value = "";
+    }
+
+    // for (key in data) {
+    //     if (data[key] === '')
+    //         return 400
+    // }
+
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.send(JSON.stringify(data));
+}
+
+function createHardcopyBook() {
+    let newUrl = url + '/addhardcopybook';
+    let data = {
+        "b_title": document.getElementById("hb_title").value,
+        "b_pages": document.getElementById("hb_pages").value,
+        "bs_rating": document.getElementById("hbs_rating").value,
+        "bs_reviews": document.getElementById("hbs_reviews").value,
+        "bs_price": document.getElementById("hbs_price").value,
+        "hb_type": document.getElementById("hb_type").value
+    }
+
+    xhttp.open("POST", newUrl);
+    xhttp.onload = function() {
+        document.getElementById("hb_title").value = "";
+        document.getElementById("hb_pages").value = "";
+        document.getElementById("hbs_rating").value = "";
+        document.getElementById("hbs_reviews").value = "";
+        document.getElementById("hbs_price").value = "";
+        document.getElementById("hb_type").value = "";
+    }
+
+    // for (key in data) {
+    //     if (data[key] === '')
+    //         return 400
+    // }
+
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.send(JSON.stringify(data));
 }
 
 function getBook(bookkey) {

@@ -66,34 +66,50 @@
   
   <div id="AddUser" class="tabcontent">
     <h3>Add User</h3>
-    Full Name<input id="u_name" type="text"> 
-    User Name<input id="u_username" type="text">
-    Password<input id="u_password" type="text">
+    <input id="u_name" type="text" placeholder="Full Name"> 
+    <input id="u_username" type="text" placeholder="User Name">
+    <input id="u_password" type="text" placeholder="Password">
     Contact Information
-    Address<input id="u_address" type="text">
-    Phone Number<input id="u_phone" type="text">
+    <input id="u_address" type="text" placeholder="Address">
+    <input id="u_phone" type="text" placeholder="Phone Number">
     <button onclick="createUser()">Add!</button>
     
   </div>
 
   <div id="AddHardcopy" class="tabcontent">
     <h3>Add Hard Copy Book</h3>
-    Title<input id="" type="text">
-    Pages<input id="" type="text">
-    Book Type<input id="" type="text">
-
-
-
+    <input id="hb_title" type="text" placeholder="Title"> 
+    <input id="hb_pages" type="text" placeholder="Pages">
+    <input id="hbs_rating" type="text" placeholder="Average Rating">
+    <input id="hbs_reviews" type="text" placeholder="Number of Reviews">
+    <input id="hbs_price" type="text" placeholder="Amazon Price">
+    <select id="hb_type">
+      <option value="">--Select Binding--</option>
+      <option value="Hardcover">Hardcover</option>
+      <option value="Paperback">Paperback</option>
+      <option value="Unknown Binding">Unknown Binding</option>
+      <option value="Boxed Set - Hardcover">Boxed Set - Hardcover</option>
+      <!-- 'Hardcover', 'Paperback', 'Unknown Binding', 'Boxed Set - Hardcover' -->
+    </select>
+    <button onclick="createHardcopyBook()">Add!</button>
 
   </div>
 
   <div id="AddEbook" class="tabcontent">
     <h3>Add eBook</h3>
-    Title <input id="" type="text">
-    Loan Period <input id="" type="text">
-    Format<input id="" type="text">
-
-
+    <input id="eb_title" type="text" placeholder="Title"> 
+    <input id="eb_pages" type="text" placeholder="Pages">
+    <input id="ebs_rating" type="text" placeholder="Average Rating">
+    <input id="ebs_reviews" type="text" placeholder="Number of Reviews">
+    <input id="ebs_price" type="text" placeholder="Amazon Price">
+    <select id="e_format">
+      <option value="">--Select Format--</option>
+      <option value="ebook">eBook</option>
+      <option value="Kindle Edition">Kindle Edition</option>
+      <!-- 'ebook', 'Kindle Edition' -->
+    </select>
+    <input id="e_loanperiod" type="text" placeholder="Loan Period">
+    <button onclick="createEBook()">Add!</button>
 
   </div>
 
