@@ -179,8 +179,10 @@ function checkOut(bookkey) {
     xhttp.open('POST', newUrl);
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.onload = function() {
-        searchBooksByTitle();
-        currentHolds();
+        if (document.getElementsByClassName('active')[0].innerHTML === 'Search')
+            searchBooksByTitle();
+        else if (document.getElementsByClassName('active')[0].innerHTML === 'Holds')
+            currentHolds();
         updateTables();
     }
     xhttp.send(JSON.stringify(body));
