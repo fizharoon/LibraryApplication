@@ -57,7 +57,7 @@ function searchUserByName() {
             attributes.forEach(attribute => {
                 result += "<td>"+user[attribute]+"</td>";
             });
-            result += "<td><button onClick=\"deleteUser(" + user['u_userkey'] + ")\">Delete User</button></td>";
+            result += "<td><button onClick=\"deleteUser(" + user['u_userkey'] + ")\" class=\"chold\">Delete User</button></td>";
             result += "</tr>";
         });
         document.getElementById("userSearchResults").innerHTML = result;
@@ -132,7 +132,7 @@ function searchBooksByTitle() {
 
         data.forEach(book => {
             result += "<tr>";
-            result += "<td><button onClick=\"deleteBook(" + book['b_bookkey'] + ")\">Remove</button></td>";
+            result += "<td><button onClick=\"deleteBook(" + book['b_bookkey'] + ")\"class=\"chold\">Remove</button></td>";
             result += "<td><a href=\"/bookinfo/" + book['b_bookkey'] + "\">" + book['b_bookkey'] + "</a></td>";
             attributes.forEach(attribute => {
                 result += "<td>"+book[attribute]+"</td>";

@@ -1,3 +1,57 @@
+.pretty{
+    background-color: RGB(198, 172, 143); /* Green */
+    border: none;
+    color: RGB(34, 51, 59);
+    padding: 10px 30px;
+    /* text-align: center; */
+    text-decoration: none;
+    /* display: inline-block; */
+    font-size: 16px;
+    transition-duration: 0.2s;
+    border-radius: 2px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    
+  }
+  .pretty:hover{
+    background-color: rgb(234, 224, 213);
+    border-radius: 2px;
+  }
+  select > option {
+    background: pink;
+  }
+
+div{
+    color:#ccc;
+    font-size: large;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+/* search field */
+.search[type=text]{
+    margin: 5px;
+    width:100px;
+    height: 40px;
+    transition: width 0.4s ease-in-out;
+    font-size: medium;
+    /* padding:20px; */
+  
+  }
+
+  
+ .search[type=text]:focus {
+    width: 500px;
+    font-size: medium;
+    height: 40px;
+  }
+input[type=text]{
+    width: 500px;
+    font-size: medium;
+    height: 40px;
+}
+
+h4{
+    color:#ccc
+}
 
 .searchbutton {
     background-color:blue;
@@ -6,11 +60,15 @@
     height: 35px;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     font-size: 15px;
- 
+    color: white;
 
   }
-
-
+a {
+    color: hotpink;
+}
+a:hover{
+    text-decoration: underline;
+}
   /* SORTING ARROWS */
   
   .arrow {
@@ -72,13 +130,7 @@
     transition:800ms ease all;
   }
   
-  input[type=text]{
-    margin: 5px;
-    width:500px;
-    height: 30px;
-    /* padding:20px; */
-  
-  }
+
   
   body {
     background-color: rgb(34, 51, 59);

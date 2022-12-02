@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <head>
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/librarian.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 </head>
 <h1>
     CS Nerd Librarian 
@@ -9,9 +11,9 @@
 <button onclick="logout()" class="logout">Log Out</button>
 <body>
 <div class="tab">
-    <button class="tablinks" onclick="openTask(event, 'Books');searchBooksByTitle()">Books</button>
-    <button class="tablinks" onclick="openTask(event, 'Users');searchUserByName()">Users</button>
-    <button class="tablinks" onclick="openTask(event, 'AddUser')">New User</button>
+    <button class="tablinks" onclick="openTask(event, 'Books');searchBooksByTitle()"><i class="fa fa-fw fa-book"></i> Books</button>
+    <button class="tablinks" onclick="openTask(event, 'Users');searchUserByName()"><i class="fa fa-fw fa-address-book"></i> Users</button>
+    <button class="tablinks" onclick="openTask(event, 'AddUser')"><i class="fa fa-fw fa-user-plus"></i> New User</button>
     <button class="tablinks" onclick="openTask(event, 'AddHardcopy')">New Hardcopy</button>
     <button class="tablinks" onclick="openTask(event, 'AddEbook')">New eBook</button>
   </div>
@@ -19,8 +21,8 @@
   <!-- Tab content -->
   <div id="Books" class="tabcontent">
     <h3>Books</h3>
-    <input id="bookSearchfield" type="text">
-    <button class="searchbutton" type="animated bounce" onclick="searchBooksByTitle()">Search</button> 
+    <input id="bookSearchfield" type="text" class="search"placeholder="Search...">
+    <button class="pretty" onclick="searchBooksByTitle()" >Search</button> 
     <div id="searchResCount"></div>
     <table>
         <thead>
@@ -41,7 +43,7 @@
   <div id="Users" class="tabcontent">
     <h3>Users</h3>
     <input id="userSearchfield" type="text">
-    <button type="button" onclick="searchUserByName()">Search</button>
+    <button type="button" class="pretty"onclick="searchUserByName()">Search</button>
     <table>
       <thead>
         <tr class="align">
@@ -66,50 +68,50 @@
   
   <div id="AddUser" class="tabcontent">
     <h3>Add User</h3>
-    <input id="u_name" type="text" placeholder="Full Name"> 
-    <input id="u_username" type="text" placeholder="User Name">
-    <input id="u_password" type="text" placeholder="Password">
-    Contact Information
-    <input id="u_address" type="text" placeholder="Address">
-    <input id="u_phone" type="text" placeholder="Phone Number">
-    <button onclick="createUser()">Add!</button>
+    Full Name: <input id="u_name" type="text" > <br>
+    Username<input id="u_username" type="text"> <br>
+    Password:<input id="u_password" type="text" > <br>
+    Contact Information <br>
+    Address:<input id="u_address" type="text" > <br>
+    Phone Number: <input id="u_phone" type="text" ><br>
+    <button class="pretty"onclick="createUser()">Add!</button>
     
   </div>
 
   <div id="AddHardcopy" class="tabcontent">
     <h3>Add Hard Copy Book</h3>
-    <input id="hb_title" type="text" placeholder="Title"> 
-    <input id="hb_pages" type="text" placeholder="Pages">
-    <input id="hbs_rating" type="text" placeholder="Average Rating">
-    <input id="hbs_reviews" type="text" placeholder="Number of Reviews">
-    <input id="hbs_price" type="text" placeholder="Amazon Price">
-    <select id="hb_type">
+    Title: <input id="hb_title" type="text" ><br> 
+    Number of Pages: <input id="hb_pages" type="text" ><br>
+    Average Rating: <input id="hbs_rating" type="text" ><br>
+    Number of Reviews: <input id="hbs_reviews" type="text" ><br>
+    Amazon Prime: <input id="hbs_price" type="text" ><br>
+    Binding Type: <select id="hb_type">
       <option value="">--Select Binding--</option>
       <option value="Hardcover">Hardcover</option>
       <option value="Paperback">Paperback</option>
       <option value="Unknown Binding">Unknown Binding</option>
       <option value="Boxed Set - Hardcover">Boxed Set - Hardcover</option>
       <!-- 'Hardcover', 'Paperback', 'Unknown Binding', 'Boxed Set - Hardcover' -->
-    </select>
-    <button onclick="createHardcopyBook()">Add!</button>
+    </select><br>
+    <button class="pretty" onclick="createHardcopyBook()">Add!</button>
 
   </div>
 
   <div id="AddEbook" class="tabcontent">
     <h3>Add eBook</h3>
-    <input id="eb_title" type="text" placeholder="Title"> 
-    <input id="eb_pages" type="text" placeholder="Pages">
-    <input id="ebs_rating" type="text" placeholder="Average Rating">
-    <input id="ebs_reviews" type="text" placeholder="Number of Reviews">
-    <input id="ebs_price" type="text" placeholder="Amazon Price">
-    <select id="e_format">
+    Title: <input id="eb_title" type="text"> <br>
+    Pages: <input id="eb_pages" type="text"> <br>
+    Average Rating: <input id="ebs_rating" type="text" > <br>
+    Number of Reviews: <input id="ebs_reviews" type="text" > <br>
+    Amazon Price: <input id="ebs_price" type="text" > <br>
+    Format Type: <select id="e_format">
       <option value="">--Select Format--</option>
       <option value="ebook">eBook</option>
       <option value="Kindle Edition">Kindle Edition</option>
       <!-- 'ebook', 'Kindle Edition' -->
-    </select>
-    <input id="e_loanperiod" type="text" placeholder="Loan Period">
-    <button onclick="createEBook()">Add!</button>
+    </select> <br>
+    Loan Period: <input id="e_loanperiod" type="text" ><br>
+    <button class="pretty"onclick="createEBook()">Add!</button>
 
   </div>
 
