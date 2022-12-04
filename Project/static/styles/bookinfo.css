@@ -1,0 +1,15 @@
+body{
+    margin-left: 500px;
+    margin-right: 500px;
+    padding-bottom: 100px;
+    text-align: center;
+    background-color: RGB(34, 51, 59);
+    color: RGB(94, 80, 63);
+}
+div{
+    background-color: RGB(234, 224, 213);
+    border-radius: 15px;
+    padding-bottom: 50px;
+    font-size: large;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
