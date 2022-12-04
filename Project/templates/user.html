@@ -2,6 +2,7 @@
 <html>
 <head>
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/user.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <title>Welcome {{session.u_name}}</title>
 </head>
 
@@ -9,9 +10,9 @@
     <h1>Hello {{session.u_name}}!</h1>
     <button onclick="logout()" class="logout">Log Out</button>
     <div class="tab">
-        <button class="tablinks" onclick="openTask(event, 'Search');searchBooksByTitle()">Search</button>
-        <button class="tablinks" onclick="openTask(event, 'Checkouts');currentCheckouts()">Checkouts</button>
-        <button class="tablinks" onclick="openTask(event, 'Holds');currentHolds()">Holds</button>
+        <button class="tablinks" onclick="openTask(event, 'Search');searchBooksByTitle()"><i class="fa fa-fw fa-search"></i> Search</button>
+        <button class="tablinks" onclick="openTask(event, 'Checkouts');currentCheckouts()"><i class="fa fa-fw fa-check"></i> Checkouts</button>
+        <button class="tablinks" onclick="openTask(event, 'Holds');currentHolds()"><i class="fa fa-fw fa-hourglass"></i> Holds</button>
       </div>
       
       <!-- Tab content -->
