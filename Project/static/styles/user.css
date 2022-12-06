@@ -1,4 +1,13 @@
+.search[type=text]{
+  margin: 5px;
+  width:1250px;
+  height: 40px;
+  transition: width 0.4s ease-in-out;
+  font-size: medium;
+  /* text-align: center; */
+  /* padding:20px; */
 
+}
 .searchbutton{
   background-color: RGB(198, 172, 143); /* Green */
   border: none;
