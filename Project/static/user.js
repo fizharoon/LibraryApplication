@@ -179,10 +179,14 @@ function checkOut(bookkey) {
     xhttp.open('POST', newUrl);
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.onload = function() {
-        if (document.getElementsByClassName('active')[0].innerHTML === 'Search')
+        // console.log(document.getElementsByClassName('active')[0].innerHTML)
+        if (document.getElementsByClassName('active')[0].innerHTML.includes('Search')) {
+            console.log('search page')
             searchBooksByTitle();
-        else if (document.getElementsByClassName('active')[0].innerHTML === 'Holds')
+        } else if (document.getElementsByClassName('active')[0].innerHTML.includes('Holds')) {
+            console.log('holds page')
             currentHolds();
+        }
         updateTables();
     }
     xhttp.send(JSON.stringify(body));

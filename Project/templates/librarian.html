@@ -21,7 +21,7 @@
   <!-- Tab content -->
   <div id="Books" class="tabcontent">
     <h3>Books</h3>
-    <input id="bookSearchfield" type="text" class="search"placeholder="Search...">
+    <input id="bookSearchfield" type="text" class="search"placeholder="Search..." onkeyup="searchBooksByTitle()">
     <button class="pretty" onclick="searchBooksByTitle()" >Search</button> 
     <div id="searchResCount"></div>
     <table>
@@ -42,7 +42,7 @@
   
   <div id="Users" class="tabcontent">
     <h3>Users</h3>
-    <input id="userSearchfield" type="text">
+    <input id="userSearchfield" type="text"  onkeyup="searchUserByName()">
     <button type="button" class="pretty"onclick="searchUserByName()">Search</button> <br><br>
     <table>
       <thead>
