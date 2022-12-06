@@ -111,7 +111,7 @@ def searchForUser():
     try:
         name = request.args.get('name')
         res = []
-        names = ['u_userkey', 'u_name', 'u_username', 'u_password', 'u_librariankey', 'u_address', 'u_phone', 'u_pastcheckouts', 'u_curcheckouts', 'u_curholds']
+        names = ['u_userkey', 'u_name', 'u_username', 'u_password', 'u_librarian', 'u_address', 'u_phone', 'u_pastcheckouts', 'u_curcheckouts', 'u_curholds']
 
         sql = """
             select * from user_info
