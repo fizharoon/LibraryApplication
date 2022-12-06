@@ -1,2 +1,6 @@
 
 .DS_Store
+
+flask_session/
+
+Project/__pycache__/

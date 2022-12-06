@@ -1,3 +1,6 @@
+.mode csv
+.separator ','
+
 DROP TABLE import;
 DROP TABLE hb_import;
 DROP TABLE books;
@@ -37,15 +40,17 @@ CREATE TABLE book_stats(
 
 CREATE TABLE hardcopy_books(
     hb_bookkey      INTEGER(270) PRIMARY KEY,
-    hb_userkey      INTEGER(200),
+    hb_userkey      INTEGER(200) REFERENCES user(u_userkey),
     hb_codate       DATETIME,
-    hb_type         VARCHAR(50)
+    hb_type         VARCHAR(50),
+    CHECK (hb_type IN ('Hardcover', 'Paperback', 'Unknown Binding', 'Boxed Set - Hardcover'))
 );
 
 CREATE TABLE ebooks(
     e_bookkey       INTEGER(270) PRIMARY KEY,
-    e_loanperiod    INTEGER(30),
-    e_format        VARCHAR(50)
+    e_loanperiod    INTEGER(30) DEFAULT '1000 days',
+    e_format        VARCHAR(50),
+    CHECK (e_format in ('ebook', 'Kindle Edition'))
 );
 
 CREATE TABLE user(
@@ -66,28 +71,29 @@ CREATE TABLE librarian(
 );
 
 CREATE TABLE holds(
-    h_bookkey       INTEGER(270),
-    h_userkey       INTEGER(200),
+    h_bookkey       INTEGER(270) REFERENCES hardcopy_books(hb_bookkey),
+    h_userkey       INTEGER(200) REFERENCES user(u_userkey),
     h_holdplaced    DATETIME,
+    h_status        VARCHAR(10) DEFAULT 'ACTIVE',
     UNIQUE(h_bookkey, h_userkey, h_holdplaced)
 );
 
 CREATE TABLE ebook_checkout(
-    ec_bookkey      INTEGER(270),
-    ec_userkey      INTEGER(270),
+    ec_bookkey      INTEGER(270) REFERENCES ebooks(e_bookkey),
+    ec_userkey      INTEGER(270) REFERENCES user(u_userkey),
     ec_codate       DATETIME,
     UNIQUE(ec_bookkey, ec_userkey, ec_codate)
 );
 
 CREATE TABLE checkout_history(
-    ch_bookkey      INTEGER(270),
-    ch_userkey      INTEGER(200),
+    ch_bookkey      INTEGER(270) REFERENCES hardcopy_books(hb_bookkey),
+    ch_userkey      INTEGER(200) REFERENCES user(u_userkey),
     ch_codate       DATETIME,
     ch_cidate       DATETIME,
     UNIQUE(ch_bookkey, ch_userkey, ch_codate, ch_cidate)
 );
 
--- .import --skip 1 prog_books.csv import
+.import --skip 1 prog_book.csv import
 
 -- Run this after importing full book dataset into import table
 INSERT INTO books (b_pages, b_title)
@@ -102,7 +108,8 @@ INSERT INTO hardcopy_books (hb_bookkey, hb_type)
 SELECT b_bookkey, type
 FROM books, import
 WHERE b_title = book_title AND
-    type IN ('Hardcover', 'Paperback', 'Unknown Binding');
+    b_bookkey NOT IN (SELECT hb_bookkey FROM hardcopy_books) AND
+    type IN ('Hardcover', 'Paperback', 'Unknown Binding', 'Boxed Set - Hardcover');
 
 -- Put all ebooks into a table
 INSERT INTO ebooks (e_bookkey, e_format)
@@ -124,20 +131,24 @@ CREATE TABLE hb_import (
     codate   DATETIME
 );
 
-CREATE TABLE user_info (
+CREATE TABLE moreuser (
     id INTEGER(270) PRIMARY KEY,
     u_address VARCHAR(500),
     u_phone VARCHAR(500)
 );
 
+.import --skip 1 Librarian.csv librarian
+.import --skip 1 user.csv user
+.import --skip 1 moreuser.csv moreuser
+
 UPDATE user
 SET 
-    u_address = (select u_address from user_info
+    u_address = (select u_address from moreuser
                 where u_userkey = id),
-    u_phone = (select u_phone from user_info
+    u_phone = (select u_phone from moreuser
                 where u_userkey = id);
 
--- .import --skip 1 hardcopy_books.csv hb_import
+.import --skip 1 hardcopy_books.csv hb_import
 
 -- ch_codate + days(random(0, date_diff('days', ch_codate, date('2022-06-30'))))
 
@@ -151,31 +162,42 @@ SET
         (SELECT codate FROM hb_import
         WHERE hb_bookkey = bookkey);
 
--- .import --skip 1 holds.csv holds
+CREATE TABLE temp(
+    h_bookkey       INTEGER(270) REFERENCES hardcopy_books(hb_bookkey),
+    h_userkey       INTEGER(200) REFERENCES user(u_userkey),
+    h_holdplaced    DATETIME,
+    h_status        VARCHAR(10) DEFAULT 'ACTIVE',
+    UNIQUE(h_bookkey, h_userkey, h_holdplaced)
+);
+
+.import --skip 1 holds.csv temp
+
+INSERT INTO holds(h_bookkey, h_userkey, h_holdplaced)
+SELECT h_bookkey, h_userkey, h_holdplaced
+FROM temp;
+
+DROP TABLE temp;
 
 -- Remove ebooks from holds table (ebooks can't be held)
-DELETE FROM holds
-WHERE h_bookkey IN
-    (SELECT e_bookkey FROM ebooks);
+-- DELETE FROM holds
+-- WHERE h_bookkey IN
+--     (SELECT e_bookkey FROM ebooks);
 
--- .import --skip 1 ebook_checkout.csv ebook_checkout
+.import --skip 1 ebook_checkout.csv ebook_checkout
 
 -- Remove hard copy books from ebook checkout table
-DELETE FROM ebook_checkout
-WHERE ec_bookkey IN
-    (SELECT hb_bookkey FROM hardcopy_books);
+-- DELETE FROM ebook_checkout
+-- WHERE ec_bookkey IN
+--     (SELECT hb_bookkey FROM hardcopy_books);
 
--- .import --skip 1 checkout_history.csv checkout_history
+.import --skip 1 checkout_history.csv checkout_history
 
 -- Remove ebooks from hard copy checkout table
-DELETE FROM checkout_history
-WHERE ch_bookkey IN
-    (SELECT e_bookkey FROM ebooks);
+-- DELETE FROM checkout_history
+-- WHERE ch_bookkey IN
+--     (SELECT e_bookkey FROM ebooks);
 
--- .import --skip 1 Librarian.csv librarian
--- .import --skip 1 user.csv user
-
-DROP TABLE user_info;
+DROP TABLE moreuser;
 DROP TABLE import;
 DROP TABLE hb_import;
 
@@ -183,3 +205,6 @@ DROP TABLE hb_import;
 -- Imports don't seem to work unless sqlite engine is launched from same directory as csv files
 -- cd data\ files
 -- sqlite3 ../progbooks.db
+
+INSERT INTO librarian (l_librariankey, l_name, l_username, l_password)
+VALUES (11, 'Robert', 'robert', '2345');

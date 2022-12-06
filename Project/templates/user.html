@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/user.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Welcome {{session.u_name}}</title>
+</head>
+
+<body>
+    <h1>Hello {{session.u_name}}!</h1>
+    <button onclick="logout()" class="logout">Log Out</button>
+    <div class="tab">
+        <button class="tablinks" onclick="openTask(event, 'Search');searchBooksByTitle()"><i class="fa fa-fw fa-search"></i> Search</button>
+        <button class="tablinks" onclick="openTask(event, 'Checkouts');currentCheckouts()"><i class="fa fa-fw fa-check"></i> Checkouts</button>
+        <button class="tablinks" onclick="openTask(event, 'Holds');currentHolds()"><i class="fa fa-fw fa-hourglass"></i> Holds</button>
+      </div>
+      
+      <!-- Tab content -->
+      <div id="Search" class="tabcontent">
+        <h3>Search</h3>
+        <input id="searchfield" type="text" onkeyup="searchBooksByTitle()">
+       
+        <button type="button" class="searchbutton"onclick="searchBooksByTitle()"> 
+        Search</button>
+        <div id="searchResCount"></div>
+     
+        <table>
+            <thead>
+                <tr class="align">
+                  <th></th>
+                  <th>Book Title &emsp;<i id="sort" class="arrow up" onclick="toggleClass(this)"></i></th>
+                  <th>Pages</th>
+                  <th>Rating</th>
+                  <th>Type</th>
+                  <th>Availability</th>
+                </tr>
+              </thead>
+              <tbody id="searchResults">
+          
+          </tbody>
+        </table>
+      </div>
+      
+      <div id="Checkouts" class="tabcontent">
+        <h3>Checkouts</h3>
+        <table>
+          <thead>
+            <tr class="align">
+              <th></th>
+              <th>Book Title</th>
+              <th>Format</th>
+              <th>Checked Out On</th>
+            </tr>
+          </thead>
+          <tbody id="checkoutTable">
+      
+          </tbody>
+        </table>
+      </div>
+      
+      <div id="Holds"  class="tabcontent">
+        <h3>Holds</h3>
+        <table>
+        <thead>
+          <tr class="align">
+            <th></th>
+            <th>Book Title</th>
+            <th>Hold Placed</th>
+            <th>Availability</th>
+          </tr>
+        </thead>
+        <tbody id="holdTable">
+    
+        </tbody>
+      </table>
+      
+      </div>
+
+</body>
+  
+<script src="{{url_for('static', filename='user.js')}}"></script>
+
+</html>

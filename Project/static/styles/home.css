@@ -1,0 +1,114 @@
+
+/* COLOR SCHEME  
+#334d4d
+  umber - 5E503F, RGB(94, 80, 63)
+  white coffee - EAE0D5 RGB(234, 224, 213)
+  khaki - B7C828 RGB(198, 172, 143)
+  ebony clay - 22333B RGB(34, 51, 59) */
+
+  /* HOME PAGE STYLING */
+body{
+  background-color: RGB(34, 51, 59);
+}
+.box{
+  background-color: RGB(234, 224, 213);
+	margin: 50px;
+	width: 550px;
+	height: 600px;
+	margin: 0 auto;			/* horizontally centreing an element */
+	border-radius: 20px;
+	padding: 10px;  
+  margin-top: 50px;
+}
+h1{
+  color: RGB(34, 51, 59);
+  text-align: center;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 54px;
+}
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  /* width: 50%; */
+}
+input[type=text] {
+  width:50%;
+  height:50px;
+  /* border: 3px solid #555; */
+  border: none;
+  border-bottom: 2px solid RGB(34, 51, 59);
+  font-size: 20px;
+  /* place-items: center; */
+  /* width:50%; */
+}
+input[type=password]{
+  width:50%;
+  height:50px;
+  /* border: 3px solid #555; */
+  border: none;
+  border-bottom: 2px solid RGB(34, 51, 59);
+  font-size: 20px;
+}
+.button {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: RGB(34, 51, 59); /* Green */
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  /* text-align: center; */
+  text-decoration: none;
+  /* display: inline-block; */
+  font-size: 16px;
+  transition-duration: 0.2s;
+  border-radius: 2px;
+}
+
+button:hover{
+  background-color: rgb(21, 165, 122);
+  border-radius: 2px;
+}
+
+/* TAB FORMATTING & STYLING */
+.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+  }
+  
+  /* Style the buttons that are used to open the tab content */
+  .tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+  }
+  
+  /* Change background color of buttons on hover */
+  .tab button:hover {
+    background-color: #ddd;
+  }
+  
+  /* Create an active/current tablink class */
+  .tab button.active {
+    background-color: #ccc;
+  }
+  
+  /* Style the tab content */
+  .tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+  }
+
+
+/* TABLES FORMATTING */
+  .align{
+    text-align: left;
+  }
