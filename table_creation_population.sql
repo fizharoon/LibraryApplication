@@ -208,3 +208,99 @@ DROP TABLE hb_import;
 
 INSERT INTO librarian (l_librariankey, l_name, l_username, l_password)
 VALUES (11, 'Robert', 'robert', '2345');
+
+----------------- VIEWS -----------------
+
+DROP VIEW user_info;
+CREATE VIEW user_info(u_userkey, u_name, u_username, u_password, u_librarian, u_address, u_phone, u_pastcheckouts, u_curcheckouts, u_curholds) AS
+SELECT u_userkey, u_name, u_username, u_password, l_name, u_address, u_phone,
+    IFNULL(past_checkouts, 0) as past_checkouts,
+    IFNULL(current_checkouts, 0) + IFNULL(ebook_checkouts, 0) as current_checkouts,
+    IFNULL(cur_holds, 0) as cur_holds
+FROM librarian, user LEFT OUTER JOIN
+    (SELECT ch_userkey, count() past_checkouts
+        FROM checkout_history GROUP BY ch_userkey)
+        ON u_userkey = ch_userkey LEFT OUTER JOIN
+    (SELECT hb_userkey, count() current_checkouts
+        FROM hardcopy_books GROUP BY hb_userkey)
+        ON u_userkey = hb_userkey LEFT OUTER JOIN
+    (SELECT ec_userkey, count() ebook_checkouts
+        FROM ebook_checkout GROUP BY ec_userkey)
+        ON u_userkey = ec_userkey LEFT OUTER JOIN
+    (SELECT h_userkey, count() cur_holds
+        FROM holds GROUP BY h_userkey)
+        ON u_userkey = h_userkey
+WHERE
+    u_librariankey = l_librariankey;
+
+DROP VIEW user_holds;
+CREATE VIEW user_holds(b_userkey, b_bookkey, b_title, b_holdplaced, b_availability) AS
+SELECT h_userkey, b_bookkey, b_title, h_holdplaced,
+    CASE
+    WHEN hb_userkey IS NULL
+        THEN 'Available'
+    ELSE 'Unavailable'
+    END availability
+FROM books, holds LEFT OUTER JOIN
+    (SELECT * FROM hardcopy_books WHERE hb_userkey IS NOT NULL)
+    ON h_bookkey = hb_bookkey
+WHERE
+    h_status = 'ACTIVE' AND
+    b_bookkey = h_bookkey
+ORDER BY h_holdplaced;
+
+DROP VIEW user_checkouts;
+CREATE VIEW user_checkouts(b_userkey, b_bookkey, b_title, b_format, b_checkout, b_remaining) AS
+SELECT hb_userkey, b_bookkey, b_title, hb_type as book_format, hb_codate, 'n/a' as remaining
+FROM hardcopy_books, books
+WHERE
+    hb_userkey NOT NULL AND
+    hb_bookkey = b_bookkey
+UNION
+SELECT ec_userkey, b_bookkey, b_title, e_format, ec_codate,
+    ROUND(JULIANDAY(ec_codate, e_loanperiod) - JULIANDAY(DATE())) as remaining
+FROM ebook_checkout, ebooks, books
+WHERE
+    e_bookkey = b_bookkey AND
+    ec_bookkey = e_bookkey AND
+    DATE(ec_codate, e_loanperiod) > DATE();
+
+DROP VIEW book_info;
+CREATE VIEW book_info(b_bookkey, b_title, b_pages, b_rating, b_format, b_checkedOutBy, b_totalholds, b_totalcheckouts) AS
+SELECT b_bookkey, b_title, b_pages, bs_rating, hb_type, u_name || ' (' || hb_userkey || ')', IFNULL(total_holds, 0) total_holds, IFNULL(total_checkouts, 0) total_checkouts
+FROM books, book_stats, hardcopy_books
+    LEFT OUTER JOIN user ON hb_userkey = u_userkey
+    LEFT OUTER JOIN
+    (SELECT h_bookkey, count() as total_holds FROM holds GROUP BY h_bookkey) tholds ON hb_bookkey = tholds.h_bookkey
+    LEFT OUTER JOIN
+    (SELECT ch_bookkey, count() as total_checkouts FROM checkout_history GROUP BY ch_bookkey) tcheckouts ON hb_bookkey = tcheckouts.ch_bookkey
+WHERE
+    b_bookkey = bs_bookkey AND
+    b_bookkey = hb_bookkey
+UNION
+SELECT b_bookkey, b_title, b_pages, bs_rating, e_format, 'n/a', 'n/a', total_checkouts
+FROM books, book_stats, ebooks
+    LEFT OUTER JOIN
+    (SELECT ec_bookkey, count() as total_checkouts FROM ebook_checkout GROUP BY ec_bookkey) tcheckouts ON e_bookkey = tcheckouts.ec_bookkey
+WHERE
+    b_bookkey = bs_bookkey AND
+    b_bookkey = e_bookkey;
+
+DROP VIEW book_search;
+CREATE VIEW book_search(b_bookkey, b_title, b_pages, b_rating, b_type, b_availability) AS
+SELECT b_bookkey, b_title, b_pages, bs_rating, hb_type,
+    CASE
+    WHEN hb_userkey IS NULL
+        THEN 'Available'
+    ELSE 'Unavailable'
+    END availability
+FROM books, book_stats, hardcopy_books
+WHERE
+    bs_bookkey = b_bookkey AND
+    hb_bookkey = b_bookkey
+UNION
+SELECT b_bookkey, b_title, b_pages, bs_rating, e_format, 'Available'
+FROM books, book_stats, ebooks
+WHERE
+    bs_bookkey = b_bookkey AND
+    e_bookkey = b_bookkey;
